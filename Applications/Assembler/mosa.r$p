@@ -1,0 +1,19 @@
+/Tde/x/l/v/c/k /V3.10 /LC:\BC5\LIB +
+-v+ C:\BC5\LIB\C0L.OBJ+
+-v+ ARCHIT~1.OBJ+
+-v+ OUTFORM.OBJ+
+-v+ ASSEMB~1.OBJ+
+-v+ TYPES.OBJ+
+-v+ TOKENI~1.OBJ+
+-v+ SYMBOLS.OBJ+
+-v+ PARSER.OBJ+
+-v+ MOSA.OBJ+
+-v+ LIST.OBJ+
+-v+ INSTRU~1.OBJ+
+-v+ INPUT.OBJ
+MOSA.EXE
+
+-v+ C:\BC5\LIB\FP87.LIB+
+-v+ C:\BC5\LIB\MATHL.LIB+
+-v+ C:\BC5\LIB\CL.LIB
+

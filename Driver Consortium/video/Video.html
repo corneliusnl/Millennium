@@ -1,0 +1,63 @@
+<HTML>
+<TITLE>Video</TITLE>
+<BODY BGCOLOR="#FFFFFF" BACKGROUND="../backgnd.gif">
+
+<TABLE WIDTH="100%" BORDER="0"  BGCOLOR="#008080" CELLPADDING="2" CELLSPACING="0">
+<TR>
+<TD>
+	<FONT SIZE="6" COLOR="#FFFFFF">
+	Video
+	</FONT>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" BORDER="0" BGCOLOR="#FFFFFF" CELLSPACING="2" CELLPADDING="0">
+<TR>
+<TD>
+	Millennium supports all standard VGA cards, however, support
+	of SVGA cards is limited due to the lack of international
+	standards.  As a result of this lack of a standard each
+	video card has to have it's own driver to modify the
+	cards features at a register level.  It is hoped that
+	video card manufactures will in future directly provide support
+	by developing there own Millennium drivers for their cards.
+	Until this is done, however, high resolution video drivers will
+	have to be developed soley by the Millennium development team and
+	individual Millennium users.
+	<P>
+	The Millennium Operating System provides a generic video card
+	interface between the kernel and the video driver.  This
+	interface is known as the <B>Millennium Video Abstraction 
+	Layer (MVAL)</B>.
+</TD>
+</TR>
+</TABLE>
+
+<P>
+
+<TABLE WIDTH="100%" BORDER="0"  BGCOLOR="#008080" CELLPADDING="2" CELLSPACING="0">
+<TR>
+<TD>
+	<FONT SIZE="6" COLOR="#FFFFFF">
+	Interface
+	</FONT>
+</TD>
+</TR>
+</TABLE>
+
+<TABLE WIDTH="100%" BORDER="0" BGCOLOR="#FFFFFF" CELLSPACING="2" CELLPADDING="0">
+<TR>
+<TD>
+	<PRE>
+	int	Probe();
+	int	ModeAvailable(int Mode);
+	int	SetMode(int Mode);
+	void	SetDisplayStart(int Start);
+	void	SetDisplayWidth(int Width);
+	</PRE>
+</TD>
+</TR>
+
+</BODY>
+</HTML>

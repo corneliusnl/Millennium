@@ -1,0 +1,41 @@
+<HTML>
+<BODY BGCOLOR=#FFFFFF>
+<TITLE>Millennium Memory Manager</TITLE>
+
+<H1>Millennium Memory Manager</H1>
+As stated before, Millennium won't be hindered by the infamous 640Kb
+limit, but rather will be able to directly address upto 4GB of memory.
+The kernel will initialize the GDT (Global Descriptor Table) and will
+use a flat model to directly address up to 4GB, upon initialization the
+memory will essentially be virgin and processes will fill this global
+table with their own Local Descriptor Table (LDT), enabling to further
+divide their space into code and data segments.
+<P>
+The job of a memory manager is to:
+<UL>
+<LI>Keep track of which parts of memory are in use and which
+parts are not in use.</LI>
+<LI>To allocate memory to processes when they need it and to
+deallocate it when they are done.</LI>
+<LI>Furthermore, it is to swap between main memory and disk
+when the main memory is too small to hold all processes.</LI>
+</UL>
+
+<H1>Algorithms</H1>
+<BLOCKQUOTE>
+	<H2>Monoprogramming without Swapping or Paging</H2>
+	Undoubly the most simple implementation of memory
+	management scheme is to allow for the running of
+	only one program at a time, sharing memory between
+	that program and the operating system.
+
+	<H2>Multiprogramming with Fixed Paritions</H2>
+</BLOCKQUOTE>
+
+<B>References:</B>
+<UL>
+<LI>Operating Systems: Design and Implementation, Prentice Hall</LI>
+</UL>
+
+</BODY>
+</HTML>

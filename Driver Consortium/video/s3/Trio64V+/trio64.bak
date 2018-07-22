@@ -1,0 +1,189 @@
+//
+// S3 Trio64V+ Video Driver
+// Copyright 1997-1998 (c) Leprechaun Software. All Rights Reserved.
+//
+// Authors:
+//  Jeremiah Cornelious McCarthy	lepresoft@nf.sympatico.ca
+//
+// Source:
+//  S3 Trio64V+ Databook
+//
+#include <stdio.h>
+#include <conio.h>
+#include "io.h"
+
+//
+// Variables
+//
+int Memory;
+
+//
+// Description:
+//  Attempts to detect the video card to ensure
+//  that it is a genuine S3 Trio64V+.
+//
+int TRIO_Probe()
+{
+	// Check for desired chip ID
+	outb(0x3D4, 0x2E);
+   if(inb(0x3D5) != 0x11)
+   {
+      // Check for proper revision level
+		outb(0x3D4, 0x2F);
+      if((inb(0x3D5) & 0x40) == 0x40)
+      	return 1;
+   }
+   return 0;
+};
+
+//
+// Description:
+//  Prevents accidental access to extended registers.
+//
+int TRIO_Lock()
+{
+	outb(0x3D4, 0x40);
+   outb(0x3D5, (inb(0x3D5) & 0xFE));
+
+};
+
+//
+// Description:
+//  Enables access to extended registers.
+//
+int TRIO_Unlock()
+{
+	// Write code to SR8 to provide access to the S3 extended Sequencer registers
+	outb(0x3C4, 0x08);
+   outb(0x3C5, 0x06);
+
+   // Write code to CR38 to provide access to extended CRTC registers CR2D-CR3F
+   outb(0x3D4, 0x38);
+	outb(0x3D5, 0x48);
+
+   // Write code to CR39 to provide access to extended CRTC registers CR40-CRFF
+   outb(0x3D4, 0x39);
+   outb(0x3D5, 0xA5);
+
+   // Set bit 0 in CR40 to enable access ti the Enhansed Programming registers
+   outb(0x3D4, 0x40);
+   outb(0x3D5, inb(0x3D5) | 0x01);
+};
+
+//
+// Description:
+//  Performs any necessary card initialization.
+//
+void TRIO_Initialize()
+{
+	// Detect how much memory on video card
+	outb(0x3D4, 0x36);
+   switch(inb(0x3D5) & 0x07)
+   {
+   	case 0:  Memory = 4096;		break;
+      case 4:	Memory = 2048;		break;
+      case 6:	Memory = 1024;		break;
+   }
+};
+
+//
+// Description:
+//  Determines whether or not a particular
+//  video mode is achieveable due to card and
+//  memory restrictions.
+//
+int TRIO_ModeAvailable(int Mode)
+{
+	if(Memory * 1024 < Mode[Mode].ByteWidth * Mode[Mode].Height)
+		return 0;
+
+   return 1;
+};
+
+//
+// Description:
+//  Attempts to set the desired video mode.
+//
+int TRIO_SetMode(int Mode)
+{
+	if(!TRIO_ModeAvailable(Mode))
+		return 0;
+
+   // Set logical screen width
+   outb(0x3D4, 0x13);
+   outb(0x3D5, LineWidth  >> 3);
+
+   outb(0x3D4, 0x51);
+   outb(0x3D5, inb(0x3D5) | LineWidth >> 7);
+
+   outb(0x3D4, 0x17);
+   outb(0x3D5, 0xE3); // ??
+
+
+	switch(BitsPerPixel)
+	{
+		case 4:
+		case 8:
+			break;
+
+		case 16:
+			CR50 |= 0x10;
+			break;
+
+		case 32:
+			CR50 |= 0x30;
+			break;
+	}
+
+	switch(ScreenWidth)
+	{
+		case 640:
+			CR50 |= 0x40;
+			break;
+
+		case 800:
+//		case 1600: // if bit 2 of 4AE8 = 0
+			CR50 |= 0x80;
+			break;
+
+		case 1024:
+		case 2048: // if bit 1 of CR31 = 1
+			break;
+
+		case 1152:
+			CR50 |= 0x01;
+			break;
+
+		case 1280:
+			CR50 |= 0xC0;
+			break;
+
+		case 1600:
+			CR50 |= 0x81;
+			break;
+	}
+};
+
+//
+//
+//
+void TRIO_SetDisplayStart(int Address)
+{
+	TRIO_Unlock();
+
+	// Write low start address
+   outw(0x3D4, 0x0D | ((Address << 6) & 0xFF00));
+   // Write high bits
+   outw(0x3D4, 0x0C | ((Address >> 2) & 0xFF00));
+
+   outw(0x3D4, 0x69 | ((Address
+
+   TRIO_Lock();
+};
+
+//
+//
+//
+void TRIO_SetDisplayWidth()
+{
+};

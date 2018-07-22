@@ -1,0 +1,52 @@
+<HTML>
+<TITLE>Millennium Kernel</TITLE>
+<BODY BGCOLOR="#FFFFFF">
+
+<H1>Millennium Kernel</H1>
+<BLOCKQUOTE>
+
+<H2>About</H2>
+Millennium is is a 32-bit <A HREF="Protected Mode.html">protected mode</A>
+operating system.  Because it runs in the protected mode of the
+processor it can directly address upto 4GB, and take full
+advantage of the 32-bit processing, hardware level process
+protection and a host of other performance enhansing features.
+The operating system is simply a number of modules working
+together and interfacing with the millennium kernel to
+produce the operating system.  These modules can be
+compiled directly into the kernel (<B>monolithic</B>) or they
+can be compiled into individual modules that would be
+loaded into memory only when needed (<B>modular</B>).  Therefore,
+the kernel is a hetrogenous kernel.
+<P>
+Millenium's kernel is responsible for setting the processor into
+protected mode.  Which is achieved by constructing the descriptor
+tables, enabling the PE bit on the CR0 register, disabling the A20
+wraparound line on the KBC (Keyboard Controller), and jumping far
+to the 32-bit segment.  You might be asking now what the KBC has to do
+with protected mode?  Well, the A20, if enabled, caused any memory
+reference beyond the 1MB limit, to loop back over itself, however,
+in order to gain full access to the memory under protected mode we must
+disable this feature.
+<P>
+The descriptors setup by the kernel both determine the segmentation of
+memory and map the interrupts to their appropriate handler
+(known as the ISR - Interrupt Service Routine).  When an interrupt
+occurs, the processor stores the currents programs state on the
+stack (cs, ip, and flags), it fetches the interrupt vector, transfers
+control to the routine pointed to by the vector, and when finished it
+returns to the interrupted program.
+
+<H2>Kernel Issues</H2>
+<UL>
+<LI><A HREF="Memory Manager.html">Memory Management</A></LI>
+<LI><A HREF="Interrupts.html">Interrupts</A></LI>
+<LI><A HREF="Process Protection.html">Process Protection</A></LI>
+<LI><A HREF="Process Scheduling.html">Process Scheduling</A></LI>
+<LI><A HREF="Hardware Drivers.html">Hardware Drivers</A></LI>
+</UL>
+
+</BLOCKQUOTE>
+
+</BODY>
+</HTML>

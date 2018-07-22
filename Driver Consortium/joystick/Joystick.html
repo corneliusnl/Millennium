@@ -1,0 +1,36 @@
+<HTML>
+<TITLE>Joystick</TITLE>
+<BODY BGCOLOR="#FFFFFF">
+
+<H1>Joystick</H1>
+<BLOCKQUOTE>
+
+<H2>Registers</H2>
+<H3>0201h (R/W) Joystick Status Port</H3>
+<PRE>
+<B>DESCRIPTION</B>
+ Status port for joystick button and position read.
+
+<B>JOYSTICK BYTE</B>
+     имммямммямммямммямммямммямммяммм╩
+     ╨ 7 Ё 6 Ё 5 Ё 4 Ё 3 Ё 2 Ё 1 Ё 0 ╨
+     хмямомямомямомямомямомямомямомям╪
+       Ё   Ё   Ё   Ё   Ё   Ё   Ё   юддд Joystick A: Switch X (1 = Reached)
+       Ё   Ё   Ё   Ё   Ё   Ё   юддддддд Joystick A: Switch Y (1 = Reached)
+       Ё   Ё   Ё   Ё   Ё   юддддддддддд Joystick B: Switch X (1 = Reached)
+       Ё   Ё   Ё   Ё   юддддддддддддддд Joystick B: Switch Y (1 = Reached)
+       Ё   Ё   Ё   юддддддддддддддддддд Joystick A: Button 1 (0 = Active )
+       Ё   Ё   юддддддддддддддддддддддд Joystick A: Button 2 (0 = Active )
+       Ё   юддддддддддддддддддддддддддд Joystick B: Button 1 (0 = Active )
+       юддддддддддддддддддддддддддддддд Joystick B: Button 2 (0 = Active )
+
+<B>PROCEDURE</B>
+ a) Output byte to Joystick Status Port (0201h read/write) to reset timer
+ b) Loop until all directional bits charge in Joystick Status Port (0201h
+    read/write), use elapsed time waiting on each bit proportionally
+</PRE>
+
+</BLOCKQUOTE>
+
+</BODY>
+</HTML>

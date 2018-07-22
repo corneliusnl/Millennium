@@ -1,0 +1,25 @@
+#ifndef VIDEO_INTERFACE_H
+#define VIDEO_INTERFACE_H
+//
+// Video Card Interface
+// Copyright 1997-1998 (c) Leprechaun Software. All Rights Reserved.
+//
+// Authors:
+//  Jeremiah Cornelious McCarthy
+//
+
+typedef struct
+{
+   void	(*Lock)();
+   void	(*Unlock)();
+	int	(*Probe)();
+   int	(*Initialize)();
+   int	(*SetMode)();
+   int	(*SetLinearBuffer)(int Start, int Length);
+//	void	(*DrawLine)(int x1, int y1, int x2, int y2);
+//	void	(*DrawPolygon)();
+//	...
+} VCInterface;
+
+#endif
+

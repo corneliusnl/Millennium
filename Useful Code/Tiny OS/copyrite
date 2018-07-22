@@ -1,0 +1,18 @@
+TINOS - Tiny Operating System (build 205)
+Copyright (c) 1996 Bart Sekura
+ALL RIGHTS RESERVED
+
+NOTE: This is unfinished work and as such cannot be used for any
+      real world solutions. This release is a snapshot of current
+      development work. There are major parts of this software that
+      are untested and under development.
+
+You may freely distribute this piece of software under condition that
+this message will be included.
+
+You may use the source code in changed or unchanged form provided that
+you will maintain an appropriate copyright message in the header of
+the source file.
+
+Portions of this software are derived or based on another work as 
+(hopefully) stated in all appropriate source files.

@@ -1,0 +1,25 @@
+#ifndef GUI_RASTER_H
+#define GUI_RASTER_H
+// ------------------------------------------------------------
+// Raster Font
+// Copyright 1997 (c) Leprechaun Software.  All Rights Reserved.
+// ------------------------------------------------------------
+
+typedef struct
+{
+	long	Magic;			// Font file magic number
+	long	bmpsize;			// character bitmap size
+	short	Width;			// Width
+	short	Height;			// Height
+	short	minchar;			// lowest character code in font
+	short	maxchar;			// highest character code in font
+	short	isfixed;			// nonzero if fixed font
+	short	reserved;		// not in use
+	short	baseline;		// baseline from top of font
+	short	undwidth;		// underline width (at bottom)
+	char	fnname[16];		// Font face name
+	char	family[16];		// font family name
+
+} RASTERFONTHEADER;
+
+#endif

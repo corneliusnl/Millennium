@@ -1,0 +1,113 @@
+<HTML>
+<TITLE>Direct Memory Access</TITLE>
+<BODY BGCOLOR=#FFFFFF>
+
+<H1>Direct Memory Access</H1>
+<BLOCKQUOTE>
+
+<H2>About DMA</H2>
+The DMA controller is used to read/write from devices without using
+the CPU and therefore allowing a task to continue in the background
+while the CPU performs other tasks.
+
+<H2>Channels</H2>
+Each DMA controller (8237) has 4 channels and on todays PC's like the
+programmable interrupt controller there are two of them, and
+they are cascaded - with channel 4 linking the master to it's
+slave.
+<P>
+Channels 0-3 are 8-bit, which means they can send/receive only 8-bits
+at a time, and 4-7 are 16-bit.
+
+<H2>8-bit Registers</H2>
+<H3>0Ah - DMA Mask Register</H3>
+<PRE>
+bit 7-3 = 0  Reserved
+      2 = 0  clear mask
+        = 1  set mask
+    1-0 = 00 Select channel 0
+        = 01 select channel 1
+        = 10 select channel 2
+        = 11 select channel 3
+
+Note: You must set the mask of the channel before you
+      can reprogram it.
+</PRE>
+
+<H3>0Bh - DMA Mode Register</H3>
+<PRE>
+bit 7-6 = 00 Demand mode
+        = 01 Signal mode
+        = 10 Block mode
+        = 11 Cascade mode
+    5-4 = 0  Reserved
+    3-2 = 00 Verify operation
+        = 01 Write operation
+        = 10 Read operation
+        = 11 Reserved
+    1-0 = 00 Select channel 0
+        = 01 select channel 1
+        = 10 select channel 2
+        = 11 select channel 3
+
+Note: Tell the DMAC what to do. Common modes are:
+48h (Read operation, Signal mode)
+    Used to read data from host memory and send to whomever
+    polls it.
+44h (Write operation, Signal mode)
+    Used to write data taken from a device to memory.
+</PRE>
+
+<H3>0Ch - DMA clear byte ptr</H3>
+<PRE>
+Note: Send a zero to reset the internal ptrs
+</PRE>
+
+<H2>16-bit Registers</H2>
+<H3>D4h - DMA Mask Register</H3>
+<PRE>
+bit 7-3 = 0  Reserved
+      2 = 0  clear mask
+        = 1  set mask
+    1-0 = 00 Select channel 4
+        = 01 select channel 5
+        = 10 select channel 6
+        = 11 select channel 7
+
+Note: You must set the mask of the channel before you
+      can reprogram it.
+</PRE>
+
+<H3>D6h - DMA Mode Register</H3>
+<PRE>
+bit 7-6 = 00 Demand mode
+        = 01 Signal mode
+        = 10 Block mode
+        = 11 Cascade mode
+    5-4 = 0  Reserved
+    3-2 = 00 Verify operation
+        = 01 Write operation
+        = 10 Read operation
+        = 11 Reserved
+    1-0 = 00 Select channel 4
+        = 01 select channel 5
+        = 10 select channel 6
+        = 11 select channel 7
+
+Note: Tell the DMAC what to do. Common modes are:
+48h (Read operation, Signal mode)
+    Used to read data from host memory and send to whomever
+    polls it.
+
+44h (Write operation, Signal mode)
+    Used to write data taken from a device to memory.
+</PRE>
+
+<H3>D8h - DMA clear byte ptr</H3>
+<PRE>
+Note: Send a zero to reset the internal ptrs
+</PRE>
+
+
+</BODY>
+</HTML>

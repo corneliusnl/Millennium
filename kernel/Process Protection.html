@@ -1,0 +1,63 @@
+<HTML>
+<BODY BGCOLOR=#FFFFFF>
+<TITLE>Mutual Exclusion Algorithms</TITLE>
+<H1>Mutual Exclusion Algorithms</H1>
+	The process of making sure that if one process is using a
+shared variable or file, the other processes will be excluded from
+doing the same thing.
+
+<BLOCKQUOTE>
+<H2>Disabling Interrupts</H2>
+	Does mutual exclusion by having each process disable all
+interrupts just after entering its critical region and re-enable
+them just before leaving it.  With interrupts disabled, no clock
+interrupts can occur.  The CPU is only switched from process to
+process as a result of clock or other interrupts, therefore, once
+a process has disabled the interrupts it can examine and update
+the shared memory without fear of interference from another
+process.
+	While convient for the kernel to have control over the
+setting and unsetting of interrupts, it is generally not a good
+idea to give this ability to a process in the event that the
+process fails to re-enable the interrupts.  Furthermore, on a
+multiprocessor system, disabling interrupts only affects the
+processor on which the instruction was executed, the other
+processor would be free to access the shared memory.
+
+<H2>Lock Variables</H2>
+	In this algorithm a variable is used which is initially 0.
+When a process wants to enter its critical region, it first tests
+the lock.  If the variable is 0, the process sets it to 1 and enters
+the critical region.  If the variable was 1 the process waits until
+it becomes 0.
+	Unfortunately what happens if one process reads the lock and
+sees that it is 0.  Before it can set the lock to 1, another process
+is schelduled, runs, and sets teh lock to 1.  When the first process
+runs again it continues from where it left off, setting the variable
+to 1 and entering the critical region with another process.
+
+<H2>Strict Alternation</H2>
+	In this algorithm both process are aware of each other and
+try to alternate in entering the critical region by looping until a
+certain condition is meet.  This is known as busy waiting, and
+usually should be avoided as it wastes CPU time.
+
+<H2>Petersons's Solution</H2>
+
+<H2>TSL Instruction</H2>
+	This algorithm uses the TSL (Test and Set Lock) instruction,
+which reads the contents of a memory word into a register and then
+stores a nonzero value at that memory address.  This gurantees that
+no other instruction can access the memory word until the instruction
+has completed.
+	Again the only problem is that the process will waste CPU
+time by looping until the desired condition is meet.
+
+<H2>Sleep and Wakeup</H2>
+
+<H2>Semaphores</H2>
+
+<H2>Message Passing</H2>
+</BLOCKQUOTE>
+</BODY>
+</HTML>

@@ -1,0 +1,7 @@
+//
+// Input/Output Port Routines
+//
+extern void					outb(int port, unsigned char value);
+extern void					outw(int port, int value);
+extern unsigned char		inb(int port);
+extern int					inw(int port);

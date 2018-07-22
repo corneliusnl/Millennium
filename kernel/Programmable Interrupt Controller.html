@@ -1,0 +1,287 @@
+<HTML>
+<TITLE>Programmable Interrupt Controller</TITLE>
+<BODY BGCOLOR=#FFFFFF>
+
+<H1>Programmable Interrupt Controller</H1>
+<BLOCKQUOTE>
+
+<H2>About the PIC</H2>
+The Programmable Interrupt Controller (PIC) allow
+peripherial devices to only bother the central
+processor only when there's a need for the
+device to be serviced.  This is much more
+efficient than the other alternative which is
+to constantly poll the device -- which consumes
+processor power.
+<P>
+Because Intel processors only have one interrupt pin
+a special chip (8259 PIC) is used to allow several
+devices to share it.  It's three main purposes are to:
+
+<UL>
+<LI>To inform the processor which device is interrupting.</LI>
+<LI>To mask interrupts specified by the programmer.  Masked
+interrupts will not be processed by the CPU.</LI>
+<LI>To handle several interrupts which occur simultaneously
+using a system of priorities.</LI>
+</UL>
+
+Starting with the IBM PC/AT machines, two PICs are installed
+on the motherboard.  Each PIC is capable of handling 8 interrupt
+lines, however, the controllers are cascaded with IRQ2 being used
+to connect the master to the slave PIC.
+<P>
+It is important to note that IRQ represent the names of the signals
+passing though the chips and not the vector numbers.  For example,
+IRQ0 may use interrupt vector 8.
+
+<H2>Operating Modes</H2>
+<H3>Fixed Priority Mode</H3>
+This mode is set after controller initialization if another
+mode is not defined explicitly.  All interrupt requests of the
+given controller have priority levels from 0 to 7, with 0 being
+the highest.  After acknowledging the interrupt, the controller
+sets the bit of the highest priority interrupt to the ISR register,
+clears this bit in the IRR register, and puts it interrupt vector
+on the data bus.  The interrupt bit in the ISR remains set until the PIC
+receives the EOI command, but can be cleared immediately after the
+second interrupt has been acknowledged if the automatic end of
+interrupt bit in the ISR register is not reset, all subsequent
+requests are not processed.
+
+<H3>End of Interrupt Mode</H3>
+You can clear the bit in the ISR register using the command
+word OSW2, or automatically in Automatic End Of Interrupt mode.
+If interrupt cascading is implemeneted in the system, then for
+the slave controller you need to send the EOI command twice -
+firstly for the master and then for the slave.  There are two
+EOI command types: usual and special.  In fixed priority mode
+the interrupt controller can always find out the bit that it
+ought to reset because it has the highest priority amongst those
+which have been set in the ISR register.  Usually, the issued
+command is OSW2=20h, which must be written to port 20h or 0A0h.
+<P>
+If the controller does not preserve the fixed priority levels, in
+some cases it can't establish the acknowledged interrupt level.  At
+this point the special EOI command may be used as follows:
+OSW2 = 0110 0XXX, where XXX is the number of the ISR bit to be
+cleared.
+<P>
+As for the ISR register bit, which is masked by the mask register
+bit, it should not be cleared by the normal EOI command if the
+interrupt controller operates in specific masking mode.
+
+<H3>Automatic End Of Interrupt</H3>
+If bit 1 in ICW4 is set to 1 the controller operates in this mode
+until initialized by the ICW4.  In this mode, the interrupt
+controller automatically executes the EOI command at each
+interrupt acknowledgment.
+
+<H3>Automatic Priority Rotation Mode</H3>
+You can use this mode to operate several devices with the same
+priority.  In this mode, the lowest priority is given to the
+device being serviced.  The level of the following IRQ is given the
+highest and so on.  For example, if the level 3 device was served,
+the highest priority 0 will have the level 4 device, priority 1 will
+have level 5 device, and so on.  If the given level 3 device requires
+the service again, it will wait until all other devices, which now
+possess higher priority, are served.
+<P>
+There are two ways of rotating priority.  Firstly, you can use the EOI
+command for interrupt completion with bits 5-7 of the OCW2 word set
+to 101.  Secondly, if the interrupt controller operates in automatic
+rotation priority mode, for priority rotation you need to set bits 5-7
+to 100.  You can switch off the automatic rotation priority by setting
+these same bits to 000.
+
+<H3>Special Priority Rotation Mode</H3>
+You can rotate all interrupt priorities however you want to if you 
+set the lowest priority level number while developing the EOI by OSW2 as
+follows: OCW2 = 1110 0XXX, where XXX sets the lowest priority level.
+
+<H3>Masking Interrupts</H3>
+Interrupt enabling and disabling is performed by masking with OCW1.  The
+masking dosen't influence other functions for a given interrupt level and
+other level interrupts.
+
+<H3>The Specific Interrupt Masking Mode</H3>
+If the interrupt request is already confirmed, but the EOI command has
+not yet reset the ISR bit, then the interrupt controller prohibits interrupts
+of current or lower priority, and the system may crash.
+
+<H3>Polling Mode</H3>
+If the PIC is operating in this mode, interrupts never occur, so the
+program must periodically check the PIC status and support interrupts
+if they occur.  For IBM PC systems this mode does not apply.
+
+<H3>Fixed Priority Special Mode</H3>
+The fixed priority special mode is implemented in systems with slave
+interrupt controllers if they wish to preserve the priority of the
+slave controllers.  At this point the master controller works in the
+given mode.  This mode is similar to the fixed priority mode except that
+when the interrupt request from the given slave controller is served, it
+is not masked by the master controller and can cause the processor to be
+interrupted.  The slave controller is completely masked if it is in
+normal mode.  Also, during the interrupt handler execution, it should
+check whether the serving interrupt from the given slave interrupt
+controller is unique.  You make the check by issuing the usual EOI
+command for the slave controller and afterwards reading its ISR register.
+
+<H3>Controller Cascading Mode</H3>
+If the interrupt controller is a master one, it can be attached to 8 slave
+controllers.  This gives up to 64 priority levels.  The master and slave
+controllers are connected by the bi-directional internal three-line bus.
+During the first interrupt request acknowledgement, the master controller
+passes the current slave controller number through the bus and then permits	
+the slave controller to set its interrupt vector.
+<P>
+If the interrupt controller operates in cascading mode, then any interrupt
+controller can be initialized independantly and operate in its own mode,
+which differs from other controller modes.  In this case the EOI commands
+are duplicated - one for the master, and one for the slave.  Each controller
+has its own two I/O controls ports.
+
+<H2>Processing Interrupts</H2>
+Below is a list of the sequence of events that occur when an
+interrupt occurs.
+<OL>
+<LI>A devices connected to a certain IRQ pin sends an interrupt
+request.  The corresponding bit in the IRR is set.</LI>
+<LI>The I8259 chip processes the request taking into account
+the mask and priorities.  It then generates the INT signal for
+the CPU</LI>
+<LI>When the processor receives this signal it finishes the
+current instruction and sends two pulses on the INTA line.  The
+first pulse informs the PIC that the processor is ready to accept
+an interrupt.  The PIC sets the corresponding bit in the ISR and
+clears a bit in the IRR.  The second pulse causes the PIC to output
+the vector number to the data bus.</LI>
+<LI>The processor pushes the values of the Flags Register, CS and IP
+on the stack.</LI>
+<LI>The processor clears the TF and IF flags.</LI>
+<LI>CS and IP are loaded with the new values from the Interrupt
+Vector Table.</LI>
+<LI>Control is transferred to the corresponding Interrupt
+Service Routine.</LI>
+<LI>The IRET instruction at the end of the Interrupt Service
+Routine restores old values of CS, IP, and the Flags Register.
+The processor then continues execution of the interrupted program.</LI>
+</OL>
+
+<H2>Registers</H2>
+The PCI accepts seven 8-bit commands.  Named ICW1...ICW4 (Initialization
+Control Words) and OCW1...OCW3 (Operation Control Words).  The master
+is accessible through ports 20h and 21h and the slave through
+A0h and A1h.  The I8259 differentiates among OCW and ICW by the port
+addresses, special constant bits for each word, and the sending
+sequency (ICW1 must be followed by ICW2, etc).  You can send OCWs to
+switch the I8259 into various modes at any point after initialization.
+	
+<H3>ICW1 (Port 20h or A0h)</H3>
+<PRE>
+¦7¦6¦5¦4¦3¦2¦1¦0¦
+ ¦ ¦ ¦ ¦ ¦ ¦ ¦ +---- 1=ICW4 is needed, 0=no ICW4 needed
+ ¦ ¦ ¦ ¦ ¦ ¦ +----- 1=single 8259, 0=cascading 8259's
+ ¦ ¦ ¦ ¦ ¦ +------ 1=4 byte interrupt vectors, 0=8 byte int vectors
+ ¦ ¦ ¦ ¦ +------- 1=level triggered mode, 0=edge triggered mode
+ ¦ ¦ ¦ +-------- must be 1 for ICW1 (port must also be 20h or A0h)
+ +------------- must be zero for PC systems
+</PRE>
+
+<H3>ICW2 (Port 21h or A1h)</H3>
+<PRE>
+¦7¦6¦5¦4¦3¦2¦1¦0¦
+ ¦ ¦ ¦ ¦ ¦ +-------- 000= on 80x86 systems
+ +----------------- first five bits of 80x86 interrupt vector
+</PRE>
+	The first five bits of the interrupt vector added to the IRQ
+	number compose the interrupt vector.
+
+<H3>ICW3 (Port 21h or A1h)</H3>
+<PRE>
+¦7¦6¦5¦4¦3¦2¦1¦0¦ Master Device
+ ¦ ¦ ¦ ¦ ¦ ¦ ¦ +---- 1=interrupt request 0 has slave, 0=no slave
+ ¦ ¦ ¦ ¦ ¦ ¦ +----- 1=interrupt request 1 has slave, 0=no slave
+ ¦ ¦ ¦ ¦ ¦ +------ 1=interrupt request 2 has slave, 0=no slave
+ ¦ ¦ ¦ ¦ +------- 1=interrupt request 3 has slave, 0=no slave
+ ¦ ¦ ¦ +-------- 1=interrupt request 4 has slave, 0=no slave
+ ¦ ¦ +--------- 1=interrupt request 5 has slave, 0=no slave
+ ¦ +---------- 1=interrupt request 6 has slave, 0=no slave
+ +----------- 1=interrupt request 7 has slave, 0=no slave
+<B>Must have value 04h</B>
+
+¦7¦6¦5¦4¦3¦2¦1¦0¦ Slave Device
+ ¦ ¦ ¦ ¦ ¦ +-------- master interrupt request slave is attached to
+ +----------------- must be zero
+<B>Must have value 02h</B>
+</PRE>
+
+<H3>ICW4 (Port 21h or A1h)</H3>
+<PRE>
+¦7¦6¦5¦4¦3¦2¦1¦0¦
+ ¦ ¦ ¦ ¦ ¦ ¦ ¦ +---- 1 for 80x86 mode, 0 = MCS 80/85 mode
+ ¦ ¦ ¦ ¦ ¦ ¦ +----- 1 = auto EOI, 0=normal EOI
+ ¦ ¦ ¦ ¦ +-------- slave/master buffered mode (see below)
+ ¦ ¦ ¦ +--------- 1 = special fully nested mode (SFNM), 0=sequential
+ +-------------- unused (set to zero)
+</PRE>
+
+Once the PIC has received the last initialization word, a PIC
+intreprets all other commands sent to its ports as Operation
+Control Words unless it recongnizes another ICW1 -- in which
+case initialization begins again.
+
+<H3>OCW1 (Port 21h or A1h) - Interrupt Mask Register</H3>
+<PRE>
+¦7¦6¦5¦4¦3¦2¦1¦0¦
+ ¦ ¦ ¦ ¦ ¦ ¦ ¦ +---- 0 = service IRQ0, 1 = mask off
+ ¦ ¦ ¦ ¦ ¦ ¦ +----- 0 = service IRQ1, 1 = mask off
+ ¦ ¦ ¦ ¦ ¦ +------ 0 = service IRQ2, 1 = mask off
+ ¦ ¦ ¦ ¦ +------- 0 = service IRQ3, 1 = mask off
+ ¦ ¦ ¦ +-------- 0 = service IRQ4, 1 = mask off
+ ¦ ¦ +--------- 0 = service IRQ5, 1 = mask off
+ ¦ +---------- 0 = service IRQ6, 1 = mask off
+ +----------- 0 = service IRQ7, 1 = mask off
+</PRE>
+
+<H3>OCW2 (Port 20h or A0h) - ICR Interrupt Command Register</H3>
+<PRE>
+¦7¦6¦5¦4¦3¦2¦1¦0¦
+ ¦ ¦ ¦ ¦ ¦ +-------- interrupt request level to act upon
+ ¦ ¦ ¦ ¦ +--------- must be 0 for OCW2
+ ¦ ¦ ¦ +---------- must be 0 for OCW2
+ +--------------- EOI type (see table)
+
+<B>765  EOI - End Of Interrupt code (PC specific)</B>
+
+001  non-specific EOI command
+010  NOP
+011  specific EOI command
+100  rotate in automatic EOI mode
+101  rotate on non-specific EOI command
+110  set priority command  (uses bits 2-0)
+111  rotate on specific EOI command
+</PRE>
+
+<H3>OCW3 (20h or A0h)</H3>
+<PRE>
+¦7¦6¦5¦4¦3¦2¦1¦0¦
+ ¦ ¦ ¦ ¦ ¦ ¦ ¦ +--- 1=read IRR on next read, 0=read ISR on next read
+ ¦ ¦ ¦ ¦ ¦ ¦ +---- 1=act on value of bit 0, 0=no action if bit 0 set
+ ¦ ¦ ¦ ¦ ¦ +----- 1=poll command issued, 0=no poll command issued
+ ¦ ¦ ¦ ¦ +------ must be 1 for OCW3
+ ¦ ¦ ¦ +------- must be 0 for OCW3
+ ¦ ¦ +-------- 1=set special mask, 0=reset special mask
+ ¦ +--------- 1=act on value of bit 5, 0=no action if bit 5 set
+ +---------- not used (zero)
+</PRE>
+</BLOCKQUOTE>
+
+<B>Reference:</B>
+<UL>
+<LI>Master Class Assembly Language, WROX Press</LI>
+<LI>Help PC</LI>
+</B>
+
+</BODY>
+</HTML>

@@ -1,0 +1,774 @@
+Not yet finished, but contains a good reference to the FDC.
+Initial resources used are HelpPC and Ralf Browns Int list, ports.
+Also used, the Intel data sheet(where understanderble).
+It'll be finished when I get my FDC boot sector reading program to work.
+
+Liam
+
+
+PORT 03F0-03F7 - FDC 1	(1st Floppy Disk Controller)	second FDC at 0370
+Note:	floppy disk controller is usually an 8272, 8272A, NEC765 (or
+	  compatible), or an 82072 or 82077AA for perpendicular recording at
+	  2.88M
+
+03F2  -W  diskette controller DOR (Digital Output Register) (see #P188)
+03F4  R-  diskette controller MSR (main status register) (see #P191)
+	Note:	in non-DMA mode, all data transfers occur through
+		  PORT 03F5h and the status registers (bit 5 here
+		  indicates data read/write rather than than
+		  command/status read/write)
+03F4  -W  diskette controller data rate select register (see #P192)
+03F5  R-  diskette command/data register 0 (ST0) (see #P193)
+	status register 1 (ST1) (see #P194)
+	status register 2 (ST2) (see #P195)
+	status register 3 (ST3) (see #P196)
+03F5  -W  diskette command register.  The commands summarized here are
+	  mostly multibyte commands. This is for brief recognition only.
+	  (see #P199)
+03F7  R-  diskette controller DIR (Digital Input Register, PC/AT mode)
+		 bit 7 = 1 diskette change
+		 bit 6-0   tri-state on FDC
+03F7  -W  configuration control register (PC/AT)
+		 bit 7-2       reserved, tri-state
+		 bit 1-0 = 00  500 Kb/S mode (MFM)
+			 = 01  300 Kb/S mode (MFM)
+			 = 10  250 Kb/S mode (MFM)
+			 = 11  1   Mb/S mode (MFM) (on 82072/82077AA)
+	conflict bit 0	   FIXED DISK drive 0 select
+
+
+Bitfields for diskette controller Digital Output Register (DOR):
+Bit(s)	Description	(Table P188)
+ 7-6	reserved on PS/2
+ 7	drive 3 motor enable
+ 6	drive 2 motor enable
+ 5	drive 1 motor enable
+ 4	drive 0 motor enable
+ 3	diskette DMA enable (reserved PS/2)
+ 2	=1  FDC enable	(controller reset)
+	=0  hold FDC at reset
+ 1-0	drive select (0=A 1=B ..)
+SeeAlso: #P183,#P191,#P192,#P189
+
+Bitfields for diskette controller main status register:
+Bit(s)	Description	(Table P191)
+ 7	=1  RQM	 data register is ready
+	=0  no access is permitted
+ 6	=1  transfer is from controller to system
+	=0  transfer is from system to controller
+ 5	non-DMA mode
+ 4	diskette controller is busy
+ 3	drive 3 busy (reserved on PS/2)
+ 2	drive 2 busy (reserved on PS/2)
+ 1	drive 1 busy (= drive is in seek mode)
+ 0	drive 0 busy (= drive is in seek mode)
+SeeAlso: #P188
+
+Bitfields for diskette controller data rate select register:
+Bit(s)	Description	(Table P192)
+ 7-2	reserved on 8272
+ 7	software reset (self clearing)	82072/82077AA
+ 6	power down			82072/82077AA
+ 5	(8272/82077AA) reserved (0)
+	(82072) PLL select bit
+ 4-2	write precompensation value, 000 default
+ 1-0	data rate select
+	=00  500 Kb/S MFM	250 Kb/S FM
+	=01  300 Kb/S MFM	150 Kb/S FM
+	=10  250 Kb/S MFM	125 Kb/S FM
+	=11  1Mb/S	MFM	illegal	 FM on 8207x
+SeeAlso: #P188
+
+Bitfields for diskette command/data register 0 (ST0):
+Bit(s)	Description	(Table P193)
+ 7-6	last command status
+	00  command terminated successfully
+	01  command terminated abnormally
+	10  invalid command
+	11  terminated abnormally by change in ready signal
+ 5	seek completed
+ 4	equipment check occurred after error
+ 3	not ready
+ 2	head number at interrupt
+ 1-0	unit select (0=A 1=B .. )
+SeeAlso: #P194,#P195,#P196
+
+Bitfields for diskette status register 1 (ST1):
+Bit(s)	Description	(Table P194)
+ 7	end of cylinder; sector# greater then sectors/track
+ 6	=0
+ 5	CRC error in ID or data field
+ 4	overrun
+ 3	=0
+ 2	sector ID not found
+ 1	write protect detected during write
+ 0	ID address mark not found
+SeeAlso: #P193,#P195,#P196
+
+Bitfields for diskette status register 2 (ST2):
+Bit(s)	Description	(Table P195)
+ 7	=0
+ 6	deleted Data Address Mark detected
+ 5	CRC error in data
+ 4	wrong cylinder detected
+ 3	scan command equal condition satisfied
+ 2	scan command failed, sector not found
+ 1	bad cylinder, ID not found
+ 0	missing Data Address Mark 
+SeeAlso: #P193,#P194,#P196
+
+Bitfields for diskette status register 3 (ST3):
+Bit(s)	Description	(Table P196)
+ 7	fault status signal
+ 6	write protect status
+ 5	ready status
+ 4	track zero status
+ 3	two sided status signal
+ 2	side select (head select)
+ 1-0	unit select (0=A 1=B .. )
+SeeAlso: #P193,#P194,#P195
+
+Bitfields for fixed disk controller data register:
+Bit(s)	Description	(Table P197)
+ 7-4	reserved
+ 3	=0  reduce write current
+	=1  head select 3 enable
+ 2	disk reset enable
+ 1	disk initialization disable
+ 0	reserved
+SeeAlso: #P188,#P198
+
+(Table P199)
+Values for diskette commands:
+	MFM = MFM mode selected, opposite of MF mode
+	HDS = head select
+	DS  = drive select
+	MT  = multi track operation
+	SK  = skip deleted data address mark
+   Command	     # bytes	D7  6	5   4	3   2	1   0
+ read track		9	0  MFM	0   0	0   0	1   0
+				0   0	0   0	0 HDS DS1 DS0
+ specify		3	0   0	0   O	O   O	1   1
+ sense drive status	2	0   0	0   0	0   1	0   0
+				0   0	0   0	0 HDS DS1 DS0
+ write data		9	MT MFM	0   0	0   1	0   1
+				0   0	0   0	0 HDS DS1 DS0
+ read data		9	MT MFM SK   0	0   1	1   0
+				0   0	0   0	0 HDS DS1 DS0
+ recalibrate		2	0   0	0   0	0   1	1   1
+				0   0	0   0	0   0 DS1 DS0
+ sense interrupt status 1	0   0	0   0	1   0	0   0
+ write deleted data	9	MT MFM	0   0	1   0	0   1
+				0   0	0   0	0 HDS DS1 DS0
+ read ID		2	0  MFM	0   0	1   0	1   0
+				0   0	0   0	0 HDS DS1 DS0
+ read deleted data	9	MT MFM SK   0	1   1	0   0
+				0   0	0   0	0 HDS DS1 DS0
+ format track		10	0  MFM	0   0	1   1	0   1
+				0   0	0   0	0 HDS DS1 DS0
+ dumpreg **		1	0   0	0   0	1   1	1   0
+ seek			3	0   0	0   0	1   1	1   1
+				0   0	0   0	0 HDS DS1 DS0
+ version **		1	0   0	0   1	0   0	0   0
+ scan equal *		9	MT MFM SK   1	0   0	0   1
+				0   0	0   0	0 HDS DS1 DS0
+ perpendicular mode **	2	0   0	0   1	0   0	1   0
+				0   0	0   0	0   0 WGATE GAP
+ configure **		4	0   0	0   1	0   0	1   1
+				0   0	0   0	0   0	0   0
+ verify			9	MT MFM SK   1	0   1	1   0
+				EC  0	0   0	0 HDS DS1 DS0
+ scan low or equal *	9	MT MFM SK   1	1   0	0   1
+				0   0	0   0	0 HDS DS1 DS0
+ scan high or equal *	9	MT MFM SK   1	1   1	0   1
+				0   0	0   0	0 HDS DS1 DS0
+ relative seek **	3	1  DIR	0   0	1   1	1   1
+				0   0	0   0	0 HDS DS1 DS0
+BEWARE: not every invalid command is treated as invalid!
+ *  Note: the scan commands aren't mentioned for the 82077AA.
+ ** Note: EHD controller commands.
+
+;***********************************************************************
+	HelpPC
+
+
+                 NEC µPD765  -  Floppy Disk Controller  -  8272A
+
+        PS/2 FDC Diskette Status Register A at 3F0h
+
+        ¦7¦6¦5¦4¦3¦2¦1¦0¦  3F0h  PS/2 Disk Status Register A (read-only)
+         ¦ ¦ ¦ ¦ ¦ ¦ ¦ +---- direction
+         ¦ ¦ ¦ ¦ ¦ ¦ +----- write protect
+         ¦ ¦ ¦ ¦ ¦ +------ index
+         ¦ ¦ ¦ ¦ +------- head 1 select
+         ¦ ¦ ¦ +-------- track 0
+         ¦ ¦ +--------- step
+         ¦ +---------- second drive installed
+         +----------- interrupt pending
+
+        PS/2 FDC Diskette Status Register B at 3F1h
+
+        ¦7¦6¦5¦4¦3¦2¦1¦0¦  3F1h  PS/2 Disk Status Register B (read-only)
+         ¦ ¦ ¦ ¦ ¦ ¦ ¦ +---- motor enable 0
+         ¦ ¦ ¦ ¦ ¦ ¦ +---- motor enable 1
+         ¦ ¦ ¦ ¦ ¦ +---- write enable
+         ¦ ¦ ¦ ¦ +---- read data (toggles w/positive transition in -RD DATA)
+         ¦ ¦ ¦ +---- write data (toggles w/positive transition in WR DATA)
+         ¦ ¦ +---- drive select
+         +------ reserved
+
+        FDC Digital Output Register at 3F2h  (all systems)
+
+        ¦7¦6¦5¦4¦3¦2¦1¦0¦  port 3F2h  (write only)
+         ¦ ¦ ¦ ¦ ¦ ¦ +------ floppy drive select (0=A, 1=B, 2=floppy C, ...)
+         ¦ ¦ ¦ ¦ ¦ +------- 1 = FDC enable, 0 = hold FDC at reset
+         ¦ ¦ ¦ ¦ +-------- 1 = DMA & I/O interface enabled  (reserved PS/2)
+         ¦ ¦ ¦ +--------- 1 = turn floppy drive A motor on
+         ¦ ¦ +---------- 1 = turn floppy drive B motor on
+         ¦ +----------- 1 = turn floppy drive C motor on; (reserved PS/2)
+         +------------ 1 = turn floppy drive D motor on; (reserved PS/2)
+
+        - used to control drive motors, drive selection, and feature enable
+        - PS/2 only uses bit 0 for floppy drive select; bit 1 is reserved
+        - PS/2 only uses bits 5 & 4 for  motor enable; bits 7&6 are reserved
+        - all DOR bits are cleared during controller reset
+
+        FDC Main Status Register at 3F4h  (all systems)
+
+        ¦7¦6¦5¦4¦3¦2¦1¦0¦  port 3F4h  (read only)
+         ¦ ¦ ¦ ¦ ¦ ¦ ¦ +---- floppy drive 0 in seek mode/busy
+         ¦ ¦ ¦ ¦ ¦ ¦ +----- floppy drive 1 in seek mode/busy
+         ¦ ¦ ¦ ¦ ¦ +------ floppy drive 2 in seek mode/busy (reserved PS/2)
+         ¦ ¦ ¦ ¦ +------- floppy drive 3 in seek mode/busy (reserved PS/2)
+         ¦ ¦ ¦ +-------- FDC read or write command in progress
+         ¦ ¦ +--------- FDC is in non-DMA mode
+         ¦ +---------- I/O direction;  1 = FDC to CPU; 0 = CPU to FDC
+         +----------- data reg ready for I/O to/from CPU (request for master)
+
+        FDC Command Status Register 0 at 3F5h  (all systems)
+
+        ¦7¦6¦5¦4¦3¦2¦1¦0¦  Command Status Register 0 at port 3F5h
+         ¦ ¦ ¦ ¦ ¦ ¦ +------ unit selected at interrupt (0=A, 1=B, 2=...)
+         ¦ ¦ ¦ ¦ ¦ +------- head number at interrupt (head 0 or 1)
+         ¦ ¦ ¦ ¦ +-------- not ready on read/write or SS access to head 1
+         ¦ ¦ ¦ +--------- equipment check (see note)
+         ¦ ¦ +---------- set to 1 when FDD completes a seek command
+         +------------- last command status (see below)
+
+        Bits
+         76  Last Command Status
+         00  command terminated successfully
+         01  command execution started but terminated abnormally
+         10  invalid command issued
+         11  command terminated abnormally due to a change in state of
+             the Ready Signal from the FDC  (reserved on PS/2)
+
+        - equipment check can occur if FDD signals a fault or track zero is
+          not found after 77 steps on a recalibrate command
+        - PS/2 only uses bits 1-0 for drive (values are 01b and 10b)
+
+        FDC Command Status Register 1 at 3F5h  (all systems)
+
+        ¦7¦6¦5¦4¦3¦2¦1¦0¦  Command Status Register 1 at port 3F5h
+         ¦ ¦ ¦ ¦ ¦ ¦ ¦ +---- FDC cannot find ID address mark (see reg 2)
+         ¦ ¦ ¦ ¦ ¦ ¦ +----- write protect detected during write
+         ¦ ¦ ¦ ¦ ¦ +------ FDC cannot find sector ID
+         ¦ ¦ ¦ ¦ +------- unused (always zero)
+         ¦ ¦ ¦ +-------- over-run;  FDC not serviced in reasonable time
+         ¦ ¦ +--------- data error (CRC) in ID field or data field
+         ¦ +---------- unused (always zero)
+         +----------- end of cylinder; sector# greater than sectors/track
+
+        - bit 0 of Status Register 1 and bit 4 of Status Register 2 are
+          related and mimic each other
+
+        FDC Command Status Register 2 at 3F5h  (all systems)
+
+        ¦7¦6¦5¦4¦3¦2¦1¦0¦  Command Status Register 2 at port 3F5h
+         ¦ ¦ ¦ ¦ ¦ ¦ ¦ +---- missing address mark in data field
+         ¦ ¦ ¦ ¦ ¦ ¦ +----- bad cylinder, ID not found and Cyl Id=FFh
+         ¦ ¦ ¦ ¦ ¦ +------ scan command failed, sector not found in cylinder
+         ¦ ¦ ¦ ¦ +------- scan command equal condition satisfied
+         ¦ ¦ ¦ +-------- wrong cylinder detected
+         ¦ ¦ +--------- CRC error detected in sector data
+         ¦ +---------- sector with deleted data address mark detected
+         +----------- unused (always zero)
+
+        - bit 0 of Status Register 1 and bit 4 of Status Register 2 are
+          related and mimic each other
+
+        FDC Command Status Register 3 at 3F5h (FDD status, all systems)
+
+        ¦7¦6¦5¦4¦3¦2¦1¦0¦  Floppy Disk Drive Status at port 3F5h
+         ¦ ¦ ¦ ¦ ¦ ¦ +------ FDD unit selected status (0=A, 1=B, 2=...)
+         ¦ ¦ ¦ ¦ ¦ +------- FDD side head select status (0=head 0, 1=head 1)
+         ¦ ¦ ¦ ¦ +-------- FDD two sided status signal
+         ¦ ¦ ¦ +--------- FDD track zero status signal
+         ¦ ¦ +---------- FDD ready status signal
+         ¦ +----------- FDD write protect status signal
+         +------------ FDD fault status signal
+
+        PS/2 FDC Digital Input Register at 3F7h
+
+        ¦7¦6¦5¦4¦3¦2¦1¦0¦  3F7h  PS/2 Digital Input Register (read only)
+         ¦ ¦ ¦ ¦ ¦ ¦ ¦ +--- high density select
+         ¦ +-------------- reserved
+         +--------------- diskette change
+
+        PS/2 FDC Configuration Control Register at 3F7h
+
+        ¦7¦6¦5¦4¦3¦2¦1¦0¦  3F7h  PS/2 Config. Control Register (write only)
+         ¦ ¦ ¦ ¦ ¦ ¦ +---- DRC1, DRC0  (see below)
+         +--------------- reserved
+
+        DRC1 DRC0
+          0   0    500000 bit per second mode
+          0   1    reserved
+          1   0    250000 bit per second mode
+          1   1    reserved
+
+
+        - Digital Input Register is used to sense the state of the
+          (-diskette change) and the (-high density select) signals
+        - Configuration Control Register is used to set the transfer rate
+
+
+                         FDC Programming Considerations
+
+        Three phases of command execution:
+
+        1.  Command phase; commands are sent from the CPU to the FDC via
+            port 3F5h;  bit 6 of the Status Register at 3F4h must be zero
+        2.  Execution phase; FDC executes instruction & generates INT 6
+        3.  Result phase; status and other information is available to CPU;
+            INT 6 sets bit 7 of BIOS Data Area location 40:3E which can
+            be polled for completion status
+
+
+        Example of a read operation:
+
+        1. turn disk motor on and set delay time for drive spin up
+        2. perform seek operation;  wait for disk interrupt
+        3. prepare DMA chip to move data to memory
+        4. send read command and wait for transfer complete interrupt
+        5. read status information
+        6. turn disk motor off
+
+
+              Floppy Diskette Controller Operations (15 commands)
+
+        Read Data          D7  D6  D5  D4  D3  D2  D1  D0
+
+        command byte 0:    MT  MF  SK   0   0   1   1   0
+        command byte 1:     ?   ?   ?   ?   ?  HD  US1 US0
+        command byte 2:    cylinder number
+        command byte 3:    head number
+        command byte 4:    sector number
+        command byte 5:    bytes per sector
+        command byte 6:    end of track (last sector in track)
+        command byte 7:    gap 3 length
+        command byte 8:    data length (if cmd byte 5==0)
+        result byte 0:     status register 0
+        result byte 1:     status register 1
+        result byte 2:     status register 2
+        result byte 3:     cylinder number
+        result byte 4:     head number
+        result byte 5:     sector number
+        result byte 6:     bytes per sector
+
+        Read Deleted Data  D7  D6  D5  D4  D3  D2  D1  D0
+
+        command byte 0:    MT  MF  SK   0   1   1   0   0
+        command byte 1:     ?   ?   ?   ?   ?  HD  US1 US0
+        command byte 2:    cylinder number
+        command byte 3:    head number
+        command byte 4:    sector number
+        command byte 5:    bytes per sector
+        command byte 6:    end of track (last sector in track)
+        command byte 7:    gap 3 length
+        command byte 8:    data length (if cmd byte 5==0)
+        result byte 0:     status register 0
+        result byte 1:     status register 1
+        result byte 2:     status register 2
+        result byte 3:     cylinder number
+        result byte 4:     head number
+        result byte 5:     sector number
+        result byte 6:     bytes per sector
+
+        Write Data         D7  D6  D5  D4  D3  D2  D1  D0
+
+        command byte 0:    MT  MF   0   0   0   1   0   1
+        command byte 1:     ?   ?   ?   ?   ?  HD  US1 US0
+        command byte 2:    cylinder number
+        command byte 3:    head number
+        command byte 4:    sector number
+        command byte 5:    bytes per sector
+        command byte 6:    end of track (last sector in track)
+        command byte 7:    gap 3 length
+        command byte 8:    data length (if cmd byte 5==0)
+        result byte 0:     status register 0
+        result byte 1:     status register 1
+        result byte 2:     status register 2
+        result byte 3:     cylinder number
+        result byte 4:     head number
+        result byte 5:     sector number
+        result byte 6:     bytes per sector
+
+        Write Deleted Data D7  D6  D5  D4  D3  D2  D1  D0
+
+        command byte 0:    MT  MF   0   0   1   0   0   1
+        command byte 1:     ?   ?   ?   ?   ?  HD  US1 US0
+        command byte 2:    cylinder number
+        command byte 3:    head number
+        command byte 4:    sector number
+        command byte 5:    bytes per sector
+        command byte 6:    end of track (last sector in track)
+        command byte 7:    gap 3 length
+        command byte 8:    data length (if cmd byte 5==0)
+        result byte 0:     status register 0
+        result byte 1:     status register 1
+        result byte 2:     status register 2
+        result byte 3:     cylinder number
+        result byte 4:     head number
+        result byte 5:     sector number
+        result byte 6:     bytes per sector
+
+        Read a Track       D7  D6  D5  D4  D3  D2  D1  D0
+        (Diagnostic)
+        command byte 0:     0  MF  SK   0   0   0   1   0
+        command byte 1:     ?   ?   ?   ?   ?  HD  US1 US0
+        command byte 2:    cylinder number
+        command byte 3:    head number
+        command byte 4:    sector number
+        command byte 5:    bytes per sector
+        command byte 6:    end of track (last sector in track)
+        command byte 7:    gap 3 length
+        command byte 8:    data length (if cmd byte 5==0)
+        result byte 0:     status register 0
+        result byte 1:     status register 1
+        result byte 2:     status register 2
+        result byte 3:     cylinder number
+        result byte 4:     head number
+        result byte 5:     sector number
+        result byte 6:     bytes per sector
+
+        Read ID            D7  D6  D5  D4  D3  D2  D1  D0
+
+        command byte 0:     0  MF   0   0   1   0   1   0
+        command byte 1:     ?   ?   ?   ?   ?  HD  US1 US0
+        result byte 0:     status register 0
+        result byte 1:     status register 1
+        result byte 2:     status register 2
+        result byte 3:     cylinder number
+        result byte 4:     head number
+        result byte 5:     sector number
+        result byte 6:     bytes per sector
+
+        Format a Track     D7  D6  D5  D4  D3  D2  D1  D0
+        (Write Sector IDs)
+        command byte 0:     0  MF   0   0   1   1   0   1
+        command byte 1:     ?   ?   ?   ?   ?  HD  US1 US0
+        command byte 2:    bytes per sector
+        command byte 3:    sectors per track
+        command byte 4:    gap 3 length
+        command byte 5:    filler pattern to write in each byte
+        result byte 0:     status register 0
+        result byte 1:     status register 1
+        result byte 2:     status register 2
+        result byte 3:     cylinder number
+        result byte 4:     head number
+        result byte 5:     sector number
+        result byte 6:     bytes per sector
+
+        Scan Equal         D7  D6  D5  D4  D3  D2  D1  D0
+
+        command byte 0:    MT  MF  SK   1   0   0   0   1
+        command byte 1:     ?   ?   ?   ?   ?  HD  US1 US0
+        command byte 2:    cylinder number
+        command byte 3:    head number
+        command byte 4:    sector number
+        command byte 5:    bytes per sector
+        command byte 6:    end of track (last sector in track)
+        command byte 7:    gap 3 length
+        command byte 8:    scan test (1=scan contiguous, 2=scan alternate)
+        result byte 0:     status register 0
+        result byte 1:     status register 1
+        result byte 2:     status register 2
+        result byte 3:     cylinder number
+        result byte 4:     head number
+        result byte 5:     sector number
+        result byte 6:     bytes per sector
+
+        Scan Low or Equal  D7  D6  D5  D4  D3  D2  D1  D0
+
+        command byte 0:    MT  MF  SK   1   1   0   0   1
+        command byte 1:     ?   ?   ?   ?   ?  HD  US1 US0
+        command byte 2:    cylinder number
+        command byte 3:    head number
+        command byte 4:    sector number
+        command byte 5:    bytes per sector
+        command byte 6:    end of track (last sector in track)
+        command byte 7:    gap 3 length
+        command byte 8:    scan test (1=scan contiguous, 2=scan alternate)
+        result byte 0:     status register 0
+        result byte 1:     status register 1
+        result byte 2:     status register 2
+        result byte 3:     cylinder number
+        result byte 4:     head number
+        result byte 5:     sector number
+        result byte 6:     bytes per sector
+
+        Scan High or Equal D7  D6  D5  D4  D3  D2  D1  D0
+
+        command byte 0:    MT  MF  SK   1   1   1   0   1
+        command byte 1:     ?   ?   ?   ?   ?  HD  US1 US0
+        command byte 2:    cylinder number
+        command byte 3:    head number
+        command byte 4:    sector number
+        command byte 5:    bytes per sector
+        command byte 6:    end of track (last sector in track)
+        command byte 7:    gap 3 length
+        command byte 8:    scan test (1=scan contiguous, 2=scan alternate)
+        result byte 0:     status register 0
+        result byte 1:     status register 1
+        result byte 2:     status register 2
+        result byte 3:     cylinder number
+        result byte 4:     head number
+        result byte 5:     sector number
+        result byte 6:     bytes per sector
+
+        Recalibrate        D7  D6  D5  D4  D3  D2  D1  D0
+
+        command byte 0:     0   0   0   0   0   1   1   1
+        command byte 1:     ?   ?   ?   ?   ?   0  US1 US0
+        returns nothing
+
+        Sense Interrupt    D7  D6  D5  D4  D3  D2  D1  D0
+            Status
+        command byte 0:     0   0   0   0   1   0   0   0
+        result byte 0:     status register 0
+        result byte 1:     present cylinder number
+
+        Specify Step &     D7  D6  D5  D4  D3  D2  D1  D0
+          Head Load
+        command byte 0:     0   0   0   0   0   0   1   1
+        command byte 1:    step rate time ¦ head unload time
+        command byte 2:    ------head load time------   ND
+        returns nothing
+
+        Sense Drive        D7  D6  D5  D4  D3  D2  D1  D0
+          Status
+        command byte 0:     0   0   0   0   0   1   0   0
+        command byte 1:     ?   ?   ?   ?   ?  HD  US1 US0
+        result byte 0:     status register 3
+
+        Seek               D7  D6  D5  D4  D3  D2  D1  D0
+
+        command byte 0:     0   0   0   0   1   1   1   1
+        command byte 1:     ?   ?   ?   ?   ?  HD  US1 US0
+        command byte 2:    new cylinder number
+        returns nothing
+
+        µPD765 Version     D7  D6  D5  D4  D3  D2  D1  D0
+
+        command byte 0:     ?   ?   ?   1   0   0   0   0
+        result byte 0:     status register 0
+                           90h = µPD765B;  80h = µPD765A or µPD765A-2
+
+        Invalid Command
+
+        result byte 0:     status register 0 (value of 80h)
+
+
+        Key to Abbreviations
+        HD = Head Number Selected       SK = SKip Deleted-data address mark
+        MT = Multi-Track                US0 = drive select bit 0
+        MF = MFM mode                   US1 = drive select bit 1
+        ND = Non-DMA mode
+
+        Head Load Time = 2 to 254ms in 2ms increments
+        Head Unload Time = 16 to 240ms in 16ms increments
+        Step Rate Time = 1 to 16ms in 1ms increments
+
+
+        - PS/2 systems use the 8272A diskette controller which is software
+          and port compatible with the NEC µPD765
+        - accessed through ports 3F0h-3F7h;  NEC µPD765 is accessed through
+          ports 3F2h, 3F4h and 3F5h;   the 8272A uses ports 3F0h, 3F1h,
+          3F2h, 3F4h, 3F5h and 3F7h
+        - data, command and status registers are all accessed through
+          port 3F5h a register stack with one address presented to the bus
+        - bit 7 of BIOS Data Area byte 40:3E can be polled to determine
+          if a disk operation has completed;  this bit is set by the
+          interrupt handler when the operation has completed;  it should
+          be reset before continuing on with the next FDC operation
+
+;********************************************************************************
+INT 1E - Disk Parameter Table
+
+              INT 1E - Disk Initialization Parameter Table Vector
+
+        - not an interrupt, but a far pointer to the diskette base table
+        - this table contains initialization parameters for the disk
+          controller used during formatting, reading, and writing to a disk
+
+        Disk Initialization Parameter Table Vector Definition:
+
+        Offset     Description
+
+          00  ¦7¦6¦5¦4¦3¦2¦1¦0¦  Disk Controller Mode byte 1
+               ¦ ¦ ¦ ¦ +----------  head step rate in milliseconds (0-F)
+               +-----------------  head unload time in milliseconds (0-F)
+
+          01  ¦7¦6¦5¦4¦3¦2¦1¦0¦  Disk Controller Mode byte 2
+               ¦ ¦ ¦ ¦ ¦ ¦ ¦ +---- DMA flag (0 = use DMA)
+               +----------------- (head load time/2)-1 in milliseconds
+
+          02  clock ticks until motor off
+          03  FM or MFM Mode:  Log2 (Bytes per Sector/128)
+              FM=Frequency Modulation used on single-density disks
+              MFM=Modified Frequency Modulation used on double-sided disks
+          04  last sector on track
+          05  gap length in bytes:
+
+                     Bytes Per   Sectors     Write    Format
+              MFM     Sector    Per Track     Gap       Gap
+               1        256         18        0Ah       0Ch
+               1        256         16        20h       32h
+               2        512          8        2Ah       50h
+               2        512          9        1Bh       6Ch
+               3       1024          4        80h       F0h
+               4       2048          2        C8h       FFh
+               5       4096          1        C8h       FFh
+
+          06  disk data length
+              80h for 128 bytes/sector
+              FFh otherwise
+          07  gap length when formatting
+          08  data pattern used during formatting
+          09  floppy head bounce delay (in milliseconds)
+          0A  floppy motor start delay (in 0.125 second intervals)
+          0B  floppy motor stop delay (in 0.25 second intervals)
+
+INT 1E - SYSTEM DATA - DISKETTE PARAMETERS
+Notes:	the default parameter table (see #0671) is located at F000h:EFC7h for
+	  100% compatible BIOSes
+	if the table is changed, INT 13/AH=00h should be called to ensure that
+	  the floppy-disk controller is appropriately reprogrammed
+SeeAlso: INT 13/AH=0Fh,INT 41"HARD DISK 0",INT 4D/AH=0Ah
+
+Format of diskette parameter table:
+Offset	Size	Description	(Table 0671)
+ 00h	BYTE	first specify byte
+		bits 7-4: step rate
+		bits 3-0: head unload time (0Fh = 240 ms)
+ 01h	BYTE	second specify byte
+		bits 7-1: head load time (01h = 4 ms)
+		bit    0: non-DMA mode (always 0)
+ 02h	BYTE	delay until motor turned off (in clock ticks)
+ 03h	BYTE	bytes per sector (00h = 128, 01h = 256, 02h = 512, 03h = 1024)
+ 04h	BYTE	sectors per track
+ 05h	BYTE	length of gap between sectors (2Ah for 5.25", 1Bh for 3.5")
+ 06h	BYTE	data length (ignored if bytes-per-sector field nonzero)
+ 07h	BYTE	gap length when formatting (50h for 5.25", 6Ch for 3.5")
+ 08h	BYTE	format filler byte (default F6h)
+ 09h	BYTE	head settle time in milliseconds
+ 0Ah	BYTE	motor start time in 1/8 seconds
+SeeAlso: #2481 at INT 4D/AH=09h
+
+
+;********************************************************************************
+My version of an FDC guide.
+
+PORT
+
+03F2  rW  Digital Output Register (DOR)
+		¦7¦6¦5¦4¦3¦2¦1¦0¦
+		 ¦ ¦ ¦ ¦ ¦ ¦ ¦ ¦
+		 ¦ ¦ ¦ ¦ ¦ ¦ +-+----- floppy drive select (0=A 1=B ..)
+		 ¦ ¦ ¦ ¦ ¦ +-------- FDC enable, =0 hold FDC at reset
+		 ¦ ¦ ¦ ¦ +--------- DMA interface enabled
+		 ¦ ¦ ¦ +---------- drive 0 motor on
+		 ¦ ¦ +----------- drive 1 motor on
+		 ¦ +------------ drive 2 motor on
+		 +------------- drive 3 motor on
+
+03F4  R-  Main Status Register
+		¦7¦6¦5¦4¦3¦2¦1¦0¦
+		 ¦ ¦ ¦ ¦ ¦ ¦ ¦ +------ drive 0 busy (in seek mode)
+		 ¦ ¦ ¦ ¦ ¦ ¦ +------- drive 1 busy (in seek mode)
+		 ¦ ¦ ¦ ¦ ¦ +-------- drive 2 busy (in seek mode)
+		 ¦ ¦ ¦ ¦ +--------- drive 3 busy (in seek mode)
+		 ¦ ¦ ¦ +---------- disk controller busy (r/w in progress)
+		 ¦ ¦ +----------- FDC is in non-DMA mode
+		 ¦ +------------ Transfer; 1=FDC to CPU; 0=CPU to FDC
+		 +------------- Data register is ready, 0=no access allowed
+
+03F4  -W  Data Rate Select Register
+		¦7¦6¦5¦4¦3¦2¦1¦0¦
+		 ¦ ¦ ¦ ¦ ¦ ¦ ¦ ¦
+		 ¦ ¦ ¦ ¦ ¦ ¦ +-+----- Data rate select (see below table)
+		 ¦ ¦ ¦ ¦ ¦ ¦
+		 ¦ ¦ ¦ ¦ ¦ ¦ 
+		 ¦ ¦ ¦ +-+-+------ Write precompensation value, 000 default
+		 ¦ ¦ +----------- reserved
+		 ¦ +------------ Power down
+		 +------------- Software Reset (self clearing)
+
+		Data rate select table
+		  1 ¦ 0 ¦ MFM kb/s ¦ FM kb/s
+		 --------------------------
+		  0   0   500        250
+		  0   1   300        150
+		  1   0   250        125
+		  1   1   1 mb/s     illegal
+
+
+03F5  R-  Command/Data Register 0 (ST0)
+		¦7¦6¦5¦4¦3¦2¦1¦0¦
+		 ¦ ¦ ¦ ¦ ¦ ¦ ¦ ¦
+		 ¦ ¦ ¦ ¦ ¦ ¦ +-+----- Unit selected at interrupt (0=A 1=b ..)
+		 ¦ ¦ ¦ ¦ ¦ +-------- Head number at interrupt
+		 ¦ ¦ ¦ ¦ +--------- not ready
+		 ¦ ¦ ¦ +---------- equipment check occured after error
+		 ¦ ¦ +----------- Seek completed
+		 ¦ ¦
+		 +-+----------- Last command status (see below table)
+
+		  7 ¦ 6 ¦ Last Command Status
+		 ------------------------------
+		  0   0   command terminated successfully
+		  0   1   command terminated abnormally
+		  1   0   invalid command
+		  1   1   terminated abnormally by change in ready signal
+
+      R-  Command/Data Register 1 (ST1)
+
+
+
+
+ 82078 Register Behavior
+=========================
+
+ +------------------------------------------------------------+
+ ¦ Address from base ¦ Available Registers ¦ Access Permitted ¦
+ +------------------------------------------------------------+
+ ¦    Access to these registers DOES NOT wake up the part     ¦
+ +-------------------+---------------------+------------------+
+ ¦       000         ¦         -           ¦        R         ¦
+ ¦       001         ¦        SRB          ¦       R/W        ¦
+ ¦       010         ¦        DOR          ¦       R/W        ¦
+ ¦       011         ¦        TDR          ¦       R/W        ¦
+ ¦       100         ¦        DSR          ¦        W         ¦
+ ¦       110         ¦         -           ¦        -         ¦
+ ¦       111         ¦        DIR          ¦        R         ¦
+ ¦       111         ¦        CCR          ¦        W         ¦
+ +-------------------+---------------------+------------------+
+ ¦        Access to these registers wake up the part          ¦
+ +------------------------------------------------------------+
+ ¦       100         ¦        MSR          ¦        R         ¦
+ ¦       101         ¦        FIFO         ¦       R/W        ¦
+ +-------------------+---------------------+------------------+
+
+*Writing to the DOR or DSR does not wake up the part, however, writing any of the motor enable bits or doing a software
+reset (either via DOR or DSR reset bits) will wake up the part.

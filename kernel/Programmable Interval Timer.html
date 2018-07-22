@@ -1,0 +1,242 @@
+<HTML>
+<TITLE>Programmable Interval Timer</TITLE>
+<BODY BGCOLOR=#FFFFFF>
+
+<H1>Programmable Interval Timer</H1>
+<BLOCKQUOTE>
+
+<H2>About</H2>
+The PIT chip has 3 channels, each of which are responsible for a different
+task on the PC:
+<P>
+Channel 0 is responsible for updating the system clock. It is usually
+programmed to generate around 18.2 clock ticks a second. An interrupt 8 is
+generated for every clock tick.
+<P>
+Channel 1 controls DMA memory refreshing. DRAM is cheap, but it's memory
+cells must be periodically refreshed or they quickly lose their charge. The
+PIT chip is responsible for sending signals to the DMA chip to refresh
+memory. Most machines are refreshed at a higher rate than neccesary, and
+reprogramming channel 1 to refresh memory at a slower rate can sometime speed
+up system performance. I got a 2.5 MHz speed-up when I did it to my 286, but
+it didn't seem to work on my 486SUX33.
+<P>
+Channel 2 is connected to the speaker. It's normally programmed to generate
+a square wave so a continuous tone is heard. Reprogramming it for "Interrupt
+on Terminal Count" mode is a nifty trick which can be used to play 8-bit
+samples from the PC speaker.
+<P>
+Each channel has a counter which counts down. The PIT input frequency is
+1193181 ($1234DD) Hz. Each counter decrements once for every input clock
+cycle. "Terminal Count", mentioned several times below, is when the counter
+reaches 0.
+<P>
+Loading the counters with 0 has the same effect as loading them with 10000h,
+and is the highest count possible (approx 18.2 Hz).
+
+<H2>The PIT Ports</H2>
+The PIT chip is hooked up to the Intel CPU through the following ports:
+
+<PRE>
+<B>Port   Description</B>
+40h    Channel 0 counter (read/write)
+41h    Channel 1 counter (read/write)
+42h    Channel 2 counter (read/write)
+43h    Control Word (write only)
+</PRE>
+
+<H2>The Control Word</H2>
+<PRE>
+	      ---------------------------------
+	      | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+	      ---------------------------------
+		\___/   \___/   \_______/   \-- BCD 0 - Binary 16 bit
+		  |       |         |               1 - BCD 4 decades
+------------------------  |         |
+| Select Counter       |  |         \---------- Mode Number 0 - 5
+| 0 - Select Counter 0 |  |
+| 1 - Select Counter 1 |  |         ------------------------------
+| 2 - Select Counter 2 |  |         | Read/Load                  |
+------------------------  |         | 0 - Counter Latching       |
+			  \---------| 1 - Read/Load LSB only     |
+				    | 2 - Read/Load MSB only     |
+				    | 3 - Read/Load LSB then MSB |
+				    ------------------------------
+</PRE>
+
+<H2>The PIT Modes</H2>
+The PIT is capable of operating in 6 different modes:
+
+<PRE>
+<B>MODE 0 - Interrupt on Terminal Count</B>
+
+When this mode is set the output will be low. Loading the count register
+with a value will cause the output to remain low and the counter will start
+counting down. When the counter reaches 0 the output will go high and remain
+high until the counter is reprogrammed. The counter will continue to count
+down after terminal count is reached. Writing a value to the count register
+during counting will stop the counter, writing a second byte starts the
+new count.
+
+<B>MODE 1 - Programmable One-Shot</B>
+
+The output will go low once the counter has been loaded, and will go high
+once terminal count has been reached. Once terminal count has been reached
+it can be triggered again.
+
+<B>MODE 2 - Rate Generator</B>
+
+A standard divide-by-N counter. The output will be low for one period of the
+input clock then it will remain high for the time in the counter. This cycle
+will keep repeating.
+
+<B>MODE 3 - Square Wave Rate Generator</B>
+
+Similar to mode 2, except the ouput will remain high until one half of the
+count has been completed and then low for the other half.
+
+<B>MODE 4 - Software Triggered Strobe</B>
+
+After the mode is set the output will be high. Once the count is loaded it
+will start counting, and will go low once terminal count is reached.
+
+<B>MODE 5 - Hardware Triggered Strobe</B>
+
+Hardware triggered strobe. Similar to mode 5, but it waits for a hardware
+trigger signal before starting to count.
+
+Modes 1 and 5 require the PIT gate pin to go high in order to start
+counting. I'm not sure if this has been implemented in the PC.
+</PRE>
+
+<H2>Counter Latching</H2>
+Setting the Read/Load field in the Control Word to 0 (Counter Latch) causes
+the appropriate channel to go into a sort of "lap" mode, the counter keeps
+counting down internally but it appears to have stopped if you read it's
+values through the channel's counter port. In this way you get a stable count
+value when you read the counter. Once you send a counter latch command you
+*must* then read the counter.
+
+<H2>Registers</H2>
+<PRE>
+<B>Port 40h, 8253 Counter 0 Time of Day Clock (normally mode 3)</B>
+<B>Port 41h, 8253 Counter 1 RAM Refresh Counter (normally mode 2)</B>
+<B>Port 42h, 8253 Counter 2 Cassette and Speaker Functions</B>
+<B>Port 43h, 8253 Mode Control Register, data format:</B>
+<PRE>
+¦7¦6¦5¦4¦3¦2¦1¦0¦  Mode Control Register
+ ¦ ¦ ¦ ¦ ¦ ¦ ¦ +---- 0=16 binary counter, 1=4 decade BCD counter
+ ¦ ¦ ¦ ¦ +--------- counter mode bits
+ ¦ ¦ +------------ read/write/latch format bits
+ +--------------- counter select bits (also 8254 read back command)
+
+<B>Bits</B>
+ 76 Counter Select Bits
+ 00  select counter 0
+ 01  select counter 1
+ 10  select counter 2
+ 11  read back command (8254 only, illegal on 8253, see below)
+
+<B>Bits</B>
+ 54  Read/Write/Latch Format Bits
+ 00  latch present counter value
+ 01  read/write of MSB only
+ 10  read/write of LSB only
+ 11  read/write LSB, followed by write of MSB
+
+<B>Bits</B>
+321  Counter Mode Bits
+000  mode 0, interrupt on terminal count;  countdown, interrupt,
+     then wait for a new mode or count; loading a new count in the
+     middle of a count stops the countdown
+001  mode 1, programmable one-shot; countdown with optional
+     restart; reloading the counter will not affect the countdown
+     until after the following trigger
+010  mode 2, rate generator; generate one pulse after 'count' CLK
+     cycles; output remains high until after the new countdown has
+     begun; reloading the count mid-period does not take affect
+     until after the period
+011  mode 3, square wave rate generator; generate one pulse after
+     'count' CLK cycles; output remains high until 1/2 of the next
+     countdown; it does this by decrementing by 2 until zero, at
+     which time it lowers the output signal, reloads the counter
+     and counts down again until interrupting at 0; reloading the
+     count mid-period does not take affect until after the period
+100  mode 4, software triggered strobe; countdown with output high
+     until counter zero;  at zero output goes low for one CLK
+     period;  countdown is triggered by loading counter;  reloading
+     counter takes effect on next CLK pulse
+101  mode 5, hardware triggered strobe; countdown after triggering
+     with output high until counter zero; at zero output goes low
+     for one CLK period
+</PRE>
+
+<B>Read Back Command Format  (8254 only)</B>
+<PRE>
+¦7¦6¦5¦4¦3¦2¦1¦0¦ Read Back Command (written to Mode Control Reg)
+ ¦ ¦ ¦ ¦ ¦ ¦ ¦ +--- must be zero
+ ¦ ¦ ¦ ¦ ¦ ¦ +---- select counter 0
+ ¦ ¦ ¦ ¦ ¦ +----- select counter 1
+ ¦ ¦ ¦ ¦ +------ select counter 2
+ ¦ ¦ ¦ +------- 0 = latch status of selected counters
+ ¦ ¦ +-------- 0 = latch count of selected counters
+ +----------- 11 = read back command
+</PRE>
+
+<B>Read Back Command Status (8254 only, read from counter register)</B>
+<PRE>
+¦7¦6¦5¦4¦3¦2¦1¦0¦  Read Back Command Status
+ ¦ ¦ ¦ ¦ ¦ ¦ ¦ +--- 0=16 binary counter, 1=4 decade BCD counter
+ ¦ ¦ ¦ ¦ +-------- counter mode bits (see Mode Control Reg above)
+ ¦ ¦ +----------- read/write/latch format (see Mode Control Reg)
+ ¦ +------------ 1=null count (no count set), 0=count available
+ +------------- state of OUT pin (1=high, 0=low)
+</PRE>
+
+<PRE>
+- the 8253 is used on the PC & XT, while the 8254 is used on the AT+
+- all counters are decrementing and fully independent
+- the PIT is tied to 3 clock lines all generating 1.19318 MHz.
+- the value of 1.19318MHz is derived from (4.77/4 MHz) and has it's
+  roots based on NTSC frequencies
+- counters are 16 bit quantities which are decremented and then
+  tested against zero.	Valid range is (0-65535).  To get a value
+  of 65536 clocks you must specify 0 as the default count since
+  65536 is a 17 bit value.
+- reading by latching the count doesn't disturb the countdown but
+  reading the port directly does; except when using the 8254 Read
+  Back Command
+- counter 0 is the time of day interrupt and is generated
+  approximately 18.2 times per sec.  The value 18.2 is derived from
+  the frequency 1.10318/65536 (the normal default count).
+- counter 1 is normally set to 18 (dec.) and signals the 8237 to do
+  a RAM refresh approximately every 15µs
+- counter 2 is normally used to generate tones from the speaker
+  but can be used as a regular counter when used in conjunction
+  with the 8255
+- newly loaded counters don't take effect until after a an output
+  pulse or input CLK cycle depending on the mode
+- the 8253 has a max input clock rate of 2.6MHz, the 8254 has max
+  input clock rate of 10MHz
+
+<B>Programming considerations:</B>
+  1.  load Mode Control Register
+  2.  let bus settle (jmp $+2)
+  3.  write counter value
+  4.  if counter 0 is modified, an INT 8 handler must be written to
+      call the original INT 8 handler every 18.2 seconds.  When it
+      does call the original INT 8 handler it must NOT send and EOI
+      to the ~8259~ for the timer interrupt, since the original INT 8
+      handler will send the EOI also.
+</PRE>
+
+</BLOCKQUOTE>
+
+<B>References:</B>
+<UL>
+<LI>Mark Feldman's PIT Timer Document for PC-GPE</LI>
+<LI>Help PC</LI>
+</UL>
+
+</BODY>
+</HTML>

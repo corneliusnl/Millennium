@@ -1,0 +1,210 @@
+<TITLE>Master Boot Record</TITLE>
+<BODY BGCOLOR=#FFFFFF>
+
+<H1>Master Boot Record</H1>
+<BLOCKQUOTE>
+	Hard disks can be divided into serveral partitions.  One of the
+	partitions is marked as active and is used for booting.
+	<P>
+	The information about how the disk is divided is located in the
+	boot sector of the hard disk (sector 1, head 0, cylinder 0) and
+	has a special format -- and is known as the master boot record.
+	<P>
+	<TABLE BORDER=1>
+		<TR>
+		<TD BGCOLOR=#C0C0C0>
+			<B>Offset</B>
+		</TD>
+		<TD BGCOLOR=#C0C0C0>
+			<B>Size</B>
+		</TD>
+		<TD BGCOLOR=#C0C0C0>
+			<B>Description</B>
+		</TD>
+		</TR>
+
+		<TR>
+		<TD>
+			0
+		</TD>
+		<TD>
+			1BEh
+		</TD>
+		<TD>
+			Code which detects the active partition and boots
+			the operating system from it.
+		</TD>
+		</TR>
+
+		<TR>
+		<TD>
+			1BEh
+		</TD>
+		<TD>
+			10h
+		</TD>
+		<TD>
+			Partition entry 1
+		</TD>
+		</TR>
+
+		<TR>
+		<TD>
+			1CEh
+		</TD>
+		<TD>
+			10h
+		</TD>
+		<TD>
+			Parition entry 2
+		</TD>
+		</TR>
+
+		<TR>
+		<TD>
+			1DEh
+		</TD>
+		<TD>
+			10h
+		</TD>
+		<TD>
+			Partition entry 3
+		</TD>
+		</TR>
+
+		<TR>
+		<TD>
+			1EEh
+		</TD>
+		<TD>
+			10h
+		</TD>
+		<TD>
+			Partition entry 4
+		</TD>
+		</TR>
+
+		<TR>
+		<TD>
+			1FEh
+		</TD>
+		<TD>
+			2
+		</TD>
+		<TD>
+			Partition signature (AA55h)
+		</TD>
+		</TR>
+	</TABLE>
+
+	<H2>Partition Table</H2>
+	<TABLE BORDER=1>
+		<TR>
+		<TD BGCOLOR=#C0C0C0>
+			<B>Size</B>
+		</TD>
+		<TD BGCOLOR=#C0C0C0>
+			<B>Description</B>
+		</TD>
+		</TR>
+
+		<TR>
+		<TD VALIGN=top>
+			1
+		</TD>
+		<TD>
+			Boot flag
+			<UL>
+			<LI>80h</LI><BR>
+			Active parition
+			<LI>00h</LI><BR>
+			Non-active partition
+			</UL>
+		</TD>
+		</TR>
+
+		<TR>
+		<TD VALIGN=top>
+			1
+		</TD>
+		<TD>
+			Head number of the first track in the partition.
+		</TD>
+		</TR>
+
+		<TR>
+		<TD VALIGN=top>
+			2
+		</TD>
+		<TD>
+			The sector and cylinder of the boot sector in the partition.
+			The sector being the 6 low-ordered bits, and thee cylinder
+			being the 10 high-ordered bits.
+		</TD>
+		</TR>
+
+		<TR>
+		<TD VALIGN=top>
+			1
+		</TD>
+		<TD>
+			System type
+			<UL>
+			<LI>00h</LI><BR>
+			Unknown
+			<LI>01h</LI><BR>
+			12-bit FAT, partition smaller than 32MB
+			<LI>04h</LI><BR>
+			16-bit FAT, partition smaller than 32MB
+			<LI>05h</LI><BR>
+			Extended DOS partition
+			<LI>06h</LI><BR>
+			16-bit FAT, parition greater than or equal to 32MB
+			</UL>
+		</TD>
+		</TR>
+
+		<TR>
+		<TD VALIGN=top>
+			1
+		</TD>
+		<TD>
+			The head of the last track in the partition.
+		</TD>
+		</TR>
+
+		<TR>
+		<TD VALIGN=top>
+			2
+		</TD>
+		<TD>
+			The last sector and cylinder of the boot sector in the partition.
+			The sector being the 6 low-ordered bits, and thee cylinder
+			being the 10 high-ordered bits.
+		</TD>
+		</TR>
+
+		<TR>
+		<TD VALIGN=top>
+			4
+		</TD>
+		<TD>
+			The number of the first sector of the partition relative to
+			the beginning of the disk.<BR>
+			RelativeSector = Cylinder * SectorPerTrack * Heads +
+			Head * SectorsPerTrack + Sector -1
+		</TD>
+		</TR>
+
+		<TR>
+		<TD VALIGN=top>
+			4
+		</TD>
+		<TD>
+			The total numbers of sectors in the partition.
+		</TD>
+		</TR>
+	</TABLE>
+</BLOCKQUOTE>
+
+</BODY>

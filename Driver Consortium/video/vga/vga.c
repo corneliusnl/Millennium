@@ -1,0 +1,159 @@
+//
+// Standard VGA Support
+// Copyright 1997-1998 (c) Leprechaun Software. All Rights Reserved.
+//
+#include "io.h"
+#include "vga.h"
+#include "registers.h"
+#include "..\video.h"
+
+//
+// List of available video modes
+//
+MODETABLE	VGA_Modes[] =
+{
+	{T80x25x16,	Mode1},
+	{G320x200x16,	Mode2},
+	{G320x200x256,	Mode3},
+	{G640x480x16,	Mode4},
+};
+
+//
+// VGA Driver Interface
+//
+VIDEODRIVER	VGA_Driver =
+{
+	"Standard VGA",
+	VGA_Probe,
+	VGA_Initialize,
+	VGA_SetMode,
+};
+
+//
+// int VGA_Probe()
+//
+// Description
+//
+// Parameters
+//
+// Returns
+//  If present ? 1 : 0
+//
+int VGA_Probe()
+{
+/*	unsigned char Save, Back;
+
+	// Check for presence of DAC
+	Save = inb(PEL_IW);
+	__svgalib_delay();
+	outb(PEL_IW, ~save);
+	__svgalib_delay();
+	Back = inb(PEL_IW);
+	__svgalib_delay();
+	outb(PEL_IW, save);
+	Save = ~Save;
+	if(Back == Save)
+		return 1;
+
+	return 0;*/
+};
+
+//
+// void VGA_Initialize()
+//
+// Description
+//
+// Parameters
+//
+// Returns
+//
+void VGA_Initialize()
+{
+};
+
+//
+// int VGA_ModeAvailable(int Mode)
+//
+// Description
+//
+// Parameters
+//
+// Returns
+//  If available ? 1 : 0
+//
+int VGA_ModeAvailable(int Mode)
+{
+	int i;
+
+	for(i = 0; i < 4; i++)
+		if(Mode = VGA_Modes[i].Mode)
+			return 1;
+
+	return 0;
+};
+
+//
+// int VGA_SetMode(int Mode)
+//
+// Description
+//
+// Parameters
+//
+// Returns
+//  If successful ? 1 : 0
+//
+int VGA_SetMode(int Mode)
+{
+	unsigned char *P;
+	int i;
+
+	for(i = 0; i < 4; i++)
+		if(Mode == VGA_Modes[i].Mode)
+			P = VGA_Modes[i].Registers;
+
+	if(!P)
+		return 0;
+
+	outb(MISC_ADDR, *P++);
+	outb(STATUS_ADDR, *P++);
+
+	// Write sequencer bytes
+	for(i = 0; i < 5; i++)
+	{
+		outb(SEQ_ADDR, i);
+		outb(SEQ_ADDR+1, *P++);
+	}
+
+	// Clear CRTC protection bits (regs 1-7)
+	outb(CRTC_ADDR, 0x11);
+	outb(CRTC_ADDR, inb(CRTC_ADDR) & 0x7F);
+
+	// Write CRTC bytes
+	for(i = 0; i < 25; i++)
+	{
+		outb(CRTC_ADDR, i);
+		outb(CRTC_ADDR+1, *P++);
+	}
+
+	// Write graphics controller bytes
+	for(i = 0; i < 9; i++)
+	{
+		outb(GFXC_ADDR, i);
+		outb(GFXC_ADDR+1, *P++);
+	}
+
+	// Set attribute register to address mode
+	inb(STATUS_ADDR);
+
+	// Write attribute bytes
+	for(i = 0; i < 21; i++)
+	{
+		inw(ATTRIB_ADDR);
+		outb(ATTRIB_ADDR, i);
+		outb(ATTRIB_ADDR, *P++);
+	}
+	// Enable attrib
+	outb(ATTRIB_ADDR, 0x20);
+
+	return 0;
+};

@@ -1,0 +1,52 @@
+#ifndef HALUI_WINMESSAGES_H
+#define HALUI_WINMESSAGES_H
+// ------------------------------------------------------------
+// HAL GUI Windowing Messages
+// Copyright 1997 (c) Leprechaun Software. All Rights Reserved.
+// ------------------------------------------------------------
+
+//
+// Window Messages
+//
+enum
+{
+	WM_CREATE,
+	WM_DESTROY,
+	WM_CLOSE,
+	WM_MOVE,
+	WM_PAINT,
+	WM_SIZE,
+	WM_QUIT,
+	WM_SHOWWINDOW,
+	WM_SETTEXT,
+	WM_COMMAND,
+
+	WM_LBUTTONDOWN,
+	WM_LBUTTONUP,
+	WM_LBUTTONDBLCLK,
+	WM_MBUTTONDOWN,
+	WM_MBUTTONUP,
+	WM_MBUTTONDBLCLK,
+	WM_RBUTTONDDOWN,
+	WM_RBUTTONUP,
+	WM_RBUTTONDBLCLK,
+	WM_MOUSEMOVE,
+
+	WM_NCLBUTTONDOWN,
+	WM_NCLBUTTONUP,
+	WM_NCLBUTTONDBLCLK,
+	WM_NCMBUTTONDOWN,
+	WM_NCMBUTTONUP,
+	WM_NCMBUTTONDBLCLK,
+	WM_NCRBUTTONDDOWN,
+	WM_NCRBUTTONUP,
+	WM_NCRBUTTONDBLCLK,
+	WM_NCMOUSEMOVE,
+
+	WM_NCCREATE,
+	WM_NCDESTROY,
+	WM_NCPAINT,
+	WN_NCACTIVATE,
+};
+
+#endif

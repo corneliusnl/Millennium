@@ -1,0 +1,4 @@
+INTEL 430TX PCISET: 82439TX SYSTEM CONTROLLER (MTXC)
+
+The Intel 430TX PCIset (430TX) consists of the 82439TX System Controller
+(MTXC) and the 82371AB PCI ISA IDE Xcelerator (PIIX4).

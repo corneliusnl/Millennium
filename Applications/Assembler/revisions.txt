@@ -1,0 +1,20 @@
+Millennium Operating System Assembler
+Copyright 1997-1998 (c) Leprechaun Software. All Rights Reserved.
+
+(July 3rd-4th)  I never intended to pursue my operating system idea
+any further than what I had been able to get done in the last year
+when I had to essentially give up due to difficulties and my personal
+inexperience, however, strangely enough I find myself being pulled back
+in.  I'm determined not to sleep until I have a functioning version
+of my assembler that will at least create a simple boot sector.  In any
+event, I imagine that this project will develop into a small operating
+system at the least... the assembler is organized in a modular and object
+orientated design that will ensure that it's popularity.
+
+(July 5th-6th) Worked on the implementation of the symbol table and
+type tables necessary for the development of the assembler.
+
+(July 7th) Discovered bug that caused segmentation faults at the end
+of an assembly due to the destruction of the predefined types
+in the parser class after they had been destroyed by the type table
+class.

@@ -1,0 +1,135 @@
+<HTML>
+<TITLE>Adlib</TITLE>
+<BODY BGCOLOR="#FFFFFF">
+
+<H1>Adlib</H1>
+<BLOCKQUOTE>
+
+<H2>Registers</H2>
+
+<H3>0388h (R) Status Port</H3>
+<PRE>
+<B>DESCRIPTION</B>
+ Categorizes left-channel synthesizer generated timer interrupts.
+
+<B>STATUS BYTE</B>
+¦7¦6¦5¦4¦3¦2¦1¦0¦
+ ¦ ¦ ¦ ¦ ¦ ¦ ¦ +----
+ ¦ ¦ ¦ ¦ ¦ ¦ +-----
+ ¦ ¦ ¦ ¦ ¦ +------
+ ¦ ¦ ¦ ¦ +-------
+ ¦ ¦ ¦ +--------
+ ¦ ¦ +--------- Time 2 status (1=expired)
+ ¦ +---------- Timer 1 status (1=expired)
+ +----------- Global timer status (1=active)
+
+<B>NOTES</B>
+ þ Global Timer Status will be active if either timer has expired.
+ þ Counter period of Timer 1 is 80æs, and Timer 2 is 230æs.
+ þ Synthesizer generated timer interrupts are signalled on IRQ0.
+ þ Alias for FM Music - Left Status Port (02x00h).
+</PRE>
+
+<H3>0388h (W) Register Port</H3>
+<PRE>
+<B>DESCRIPTION</B>
+ Selects register index into left-channel synthesizer data port (0389h)
+
+<B>PROCEDURE</B>
+ a) Write register index (0388h)
+ b) Wait 3.3æs (0.0?æs OPL3)
+ c) Write register data  (0389h)
+ d) Wait 23æs  (0.28æs OPL3)
+
+<B>NOTES</B>
+ þ Original SoundBlaster Pros were equipped with dual OPL2 synthesizers,
+   connecting this channel to the left speaker exclusively; whereas later
+   models began using OPL3-compatible synthesizers, which send all output
+   to both the left and right speakers unless programmed to do otherwise.
+ þ Alias for FM Music - Left Register Port (02x00h).
+</PRE>
+
+<H3>0389h Data Register</H3>
+<PRE>
+<B>DESCRIPTION</B>
+ References currently selected left-channel synthesizer index register.
+
+<B>PROCEDURE</B>
+ a) Write register index (0388h)
+ b) Wait 3.3æs (0.0?æs OPL3)
+ c) Write register data  (0389h)
+ d) Wait 23æs  (0.28æs OPL3)
+
+<B>NOTES</B>
+ þ Original SoundBlaster Pros were equipped with dual OPL2 synthesizers,
+   connecting this channel to the left speaker exclusively; whereas later
+   models began using OPL3-compatible synthesizers, which send all output
+   to both the left and right speakers unless programmed to do otherwise.
+ þ Alias for FM Music - Left Data Register (02x01h).
+</PRE>
+
+<H3>038Ah (R) Advanced AdLib - Status Port</H3>
+<PRE>
+<B>DESCRIPTION</B>
+ Categorizes right-channel synthesizer generated timer interrupts.
+
+<B>STATUS BYTE</B>
+¦7¦6¦5¦4¦3¦2¦1¦0¦
+ ¦ ¦ ¦ ¦ ¦ ¦ ¦ +----
+ ¦ ¦ ¦ ¦ ¦ ¦ +-----
+ ¦ ¦ ¦ ¦ ¦ +------
+ ¦ ¦ ¦ ¦ +-------
+ ¦ ¦ ¦ +--------
+ ¦ ¦ +--------- Timer 2 status (1=expired)
+ ¦ +---------- Timer 1 status (1=expired)
+ +----------- Global timer status (1=active)
+
+<B>NOTES</B>
+ þ Global Timer Status will be active if either timer has expired.
+ þ Counter period of Timer 1 is 80æs, and Timer 2 is 230æs.
+ þ Synthesizer generated timer interrupts are signalled on IRQ0.
+ þ Alias for FM Music - Right Status Port (02x02h) on SB16 or higher.
+</PRE>
+
+<H3>038Ah (W) Advanced AdLib - Register Port</H3>
+<PRE>
+<B>DESCRIPTION</B>
+ Selects register index into right-channel synthesizer data port (038Bh)
+
+<B>PROCEDURE</B>
+ a) Write register index (038Ah)
+ b) Wait 3.3æs (0.0?æs OPL3)
+ c) Write register data  (038Bh)
+ d) Wait 23æs  (0.28æs OPL3)
+
+<B>NOTES</B>
+ þ Original SoundBlaster Pros were equipped with dual OPL2 synthesizers,
+   connecting this channel to the left speaker exclusively; whereas later
+   models began using OPL3-compatible synthesizers, which send all output
+   to both the left and right speakers unless programmed to do otherwise.
+ þ Alias for FM Music - Right Register Port (02x02h) on SB16 or higher.
+</PRE>
+
+<H3>038Bh (W) Advanced AdLib - Data Register</H3>
+<PRE>
+<B>DESCRIPTION</B>
+ References currently selected right-channel synthesizer index register.
+
+<B>PROCEDURE</B>
+ a) Write register index (038Ah)
+ b) Wait 3.3æs (0.0?æs OPL3)
+ c) Write register data  (038Bh)
+ d) Wait 23æs  (0.28æs OPL3)
+
+<B>NOTES</B>
+ þ Original SoundBlaster Pros were equipped with dual OPL2 synthesizers,
+   connecting this channel to the left speaker exclusively; whereas later
+   models began using OPL3-compatible synthesizers, which send all output
+   to both the left and right speakers unless programmed to do otherwise.
+ þ Alias for FM Music - Right Data Register (02x03h) on SB16 or higher.
+</PRE>
+
+</BLOCKQUOTE>
+
+</BODY>
+</HTML>

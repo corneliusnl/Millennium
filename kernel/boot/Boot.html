@@ -1,0 +1,61 @@
+<HTML>
+<BODY BGCOLOR=#FFFFFF>
+<TITLE>Boot-up Process</TITLE>
+<H1>Boot-up Process</H1>
+
+<H2>Description</H2>
+<BLOCKQUOTE>
+	<H3>Floppy Disk</H3>
+	Upon boot-up the BIOS (Basic Input/Output System)
+	performs numerous activities such as the Power On Self
+	Test (POST), one of these includes attempting to read
+	the first sector (512 bytes) of a floppy disk, if inserted.
+	If successful, and the sector contains a valid boot sector
+	program, meaning that the last two bytes of the sector
+	contain the magic number AA55h, the program is loaded
+	to address 0000h:7C00h.  Here it will be executed and
+	normally load a secondary program which will load the
+	operating system into memory and execute it.
+
+	<H3>Hard disk</H3>
+	Hard disks are a little more complicated due to the fact
+	that they can be partitioned.  Similar to a floppy disk
+	boot-up, the BIOS (Basic Input/Output System) performs
+	numerous activities such as the Power On Self Test (POST),
+	one of these includes attempting to read the first sector
+	(512 bytes) of the master hard disk.  This sector contains
+	a boot program as well as a partition table marking the
+	active partition.  The boot code will normally go to the
+	active partition and first verify if the boot code is
+	valid (containing the magic number AA55h as the last
+	two bytes of the sector) and if successful load it to
+	address 0000h:7C00h. Here it will be executed and
+	normally load a secondary program which will load the
+	operating system into memory and execute it.
+</BLOCKQUOTE>
+
+<H2>Implementation</H2>
+<BLOCKQUOTE>
+	<TABLE>
+	<TR>
+	<TD BGCOLOR=#C0C0C0>
+		Source Code
+	</TD>
+	<TD BGCOLOR=#C0C0C0>
+		Description
+	</TD>
+	</TR>
+
+	<TR>
+	<TD>
+		/Kernel/Boot/Boot.asm
+	</TD>
+	<TD>
+		Responsible for determining if the host
+		processor is a 386+, and if so, for the
+		loading of the kernel from disk and executing it.
+	</TD>
+	</TR>
+</BLOCKQUOTE>
+</BODY>
+</HTML>

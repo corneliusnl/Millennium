@@ -1,0 +1,45 @@
+#ifndef HALUI_WINFUNCTIONS_H
+#define HALUI_WINFUNCTIONS_H
+// ------------------------------------------------------------
+// HAL GUI Windowing Functions
+// Copyright 1997 (c) Leprechaun Software. All Rights Reserved.
+// ------------------------------------------------------------
+#include <WinStructures.h>
+
+//
+// Window Routines
+//
+WND		CreateWindow(char *Caption, long Style, int X, int Y, int Width, int Height);
+void		CloseWindow(WND Wnd);
+void		GetWindowRect(WND Wnd, RECT *pRect);
+void		GetClientRect(WND Wnd, RECT *pRect);
+void		DestroyWindow(WND Wnd);
+void		SetWindowText(WND Wnd, char *Caption);
+void		SetWindowPos(WND Wnd, int X, int Y, int Width, int Height);
+void		MoveWindow(WND Wnd, int X, int Y, int Width, int Height);
+long		DefWindowProc(WND Wnd, int Message);
+
+//
+// Mouse Routines
+//
+void		ClipCursor(const RECT *pRect);
+//void		CopyCursor(CURSOR Cursor);
+//CURSOR	CreateCursor(HINSTANCE hInst, int XHot, int YHot, int Width, int Height, const void *pANDData, const void *XORData);
+//void		DestroyCursor(CURSOR Cursor);
+void		GetClipCursor(RECT *pRect);
+CURSOR	GetCursor();
+void		GetCursorPos(POINT *pPoint);
+//CURSOR	LoadCursor(HINSTANCE hInstance, char *pCursorName);
+//CURSOR	LoadCursorFromFile(char *pFileName);
+void		SetCursor(CURSOR Cursor);
+void		SetCursorPos(int X, int Y);
+//void		SetSystemCursor(CURSOR Cursor, long CursorID);
+void		ShowCursor();
+void		HideCursor();
+
+//
+// Miscellaneous
+//
+void		SetRect(RECT *pRect, int Top, int Left, int Bottom, int Right);
+
+#endif

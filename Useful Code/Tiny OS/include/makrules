@@ -1,0 +1,11 @@
+#
+# default rules
+#
+
+%.o : %.S
+	$(CC) $(CFLAGS) -c $< -o $@
+%.o : %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+%.o : %.cc
+	$(CC) $(CFLAGS) -c $< -o $@
+

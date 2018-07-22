@@ -1,0 +1,97 @@
+<HTML>
+<TITLE>Floppy Disk Controller</TITLE>
+<BODY BGCOLOR=#FFFFFF>
+
+<H1>Floppy Disk Controller</H1>
+<BLOCKQUOTE>
+
+The floppy disk controller used by floppy disk systems
+is the NEC µPD765.
+
+<H2>Registers</H2>
+
+<H3>Digital Output Register at 3F2h</H3>
+<PRE>
+¦7¦6¦5¦4¦3¦2¦1¦0¦  port 3F2h  (write only)
+ ¦ ¦ ¦ ¦ ¦ ¦ +------ floppy drive select (0=A, 1=B, 2=floppy C, ...)
+ ¦ ¦ ¦ ¦ ¦ +------- 1 = FDC enable, 0 = hold FDC at reset
+ ¦ ¦ ¦ ¦ +-------- 1 = DMA & I/O interface enabled  (reserved PS/2)
+ ¦ ¦ ¦ +--------- 1 = turn floppy drive A motor on
+ ¦ ¦ +---------- 1 = turn floppy drive B motor on
+ ¦ +----------- 1 = turn floppy drive C motor on; (reserved PS/2)
+ +------------ 1 = turn floppy drive D motor on; (reserved PS/2)
+</PRE>
+
+<H3>Main Status Register at 3F4h</H3>
+<PRE>
+¦7¦6¦5¦4¦3¦2¦1¦0¦  port 3F4h  (read only)
+ ¦ ¦ ¦ ¦ ¦ ¦ ¦ +---- floppy drive 0 in seek mode/busy
+ ¦ ¦ ¦ ¦ ¦ ¦ +----- floppy drive 1 in seek mode/busy
+ ¦ ¦ ¦ ¦ ¦ +------ floppy drive 2 in seek mode/busy (reserved PS/2)
+ ¦ ¦ ¦ ¦ +------- floppy drive 3 in seek mode/busy (reserved PS/2)
+ ¦ ¦ ¦ +-------- FDC read or write command in progress
+ ¦ ¦ +--------- FDC is in non-DMA mode
+ ¦ +---------- I/O direction;  1 = FDC to CPU; 0 = CPU to FDC
+ +----------- data reg ready for I/O to/from CPU (request for master)
+</PRE>
+
+<H3>Command Status Register 0 at 3F5h</H3>
+<PRE>
+¦7¦6¦5¦4¦3¦2¦1¦0¦  Command Status Register 0 at port 3F5h
+ ¦ ¦ ¦ ¦ ¦ ¦ +------ unit selected at interrupt (0=A, 1=B, 2=...)
+ ¦ ¦ ¦ ¦ ¦ +------- head number at interrupt (head 0 or 1)
+ ¦ ¦ ¦ ¦ +-------- not ready on read/write or SS access to head 1
+ ¦ ¦ ¦ +--------- equipment check (see note)
+ ¦ ¦ +---------- set to 1 when FDD completes a seek command
+ +------------- last command status (see below)
+
+ 76  Last Command Status
+ 00  command terminated successfully
+ 01  command execution started but terminated abnormally
+ 10  invalid command issued
+ 11  command terminated abnormally due to a change in state of
+     the Ready Signal from the FDC  (reserved on PS/2)
+</PRE>
+
+<H3>Command Status Register 1 at 3F5h</H3>
+<PRE>
+¦7¦6¦5¦4¦3¦2¦1¦0¦  Command Status Register 1 at port 3F5h
+ ¦ ¦ ¦ ¦ ¦ ¦ ¦ +---- FDC cannot find ID address mark (see reg 2)
+ ¦ ¦ ¦ ¦ ¦ ¦ +----- write protect detected during write
+ ¦ ¦ ¦ ¦ ¦ +------ FDC cannot find sector ID
+ ¦ ¦ ¦ ¦ +------- unused (always zero)
+ ¦ ¦ ¦ +-------- over-run;  FDC not serviced in reasonable time
+ ¦ ¦ +--------- data error (CRC) in ID field or data field
+ ¦ +---------- unused (always zero)
+ +----------- end of cylinder; sector# greater than sectors/track
+</PRE>
+
+<H3>Command Status Register 2 at 3F5h</H3>
+<PRE>
+¦7¦6¦5¦4¦3¦2¦1¦0¦  Command Status Register 2 at port 3F5h
+ ¦ ¦ ¦ ¦ ¦ ¦ ¦ +---- missing address mark in data field
+ ¦ ¦ ¦ ¦ ¦ ¦ +----- bad cylinder, ID not found and Cyl Id=FFh
+ ¦ ¦ ¦ ¦ ¦ +------ scan command failed, sector not found in cylinder
+ ¦ ¦ ¦ ¦ +------- scan command equal condition satisfied
+ ¦ ¦ ¦ +-------- wrong cylinder detected
+ ¦ ¦ +--------- CRC error detected in sector data
+ ¦ +---------- sector with deleted data address mark detected
+ +----------- unused (always zero)
+</PRE>
+
+<H3>Command Status Register 3 at 3F5h</H3>
+<PRE>
+¦7¦6¦5¦4¦3¦2¦1¦0¦  Floppy Disk Drive Status at port 3F5h
+ ¦ ¦ ¦ ¦ ¦ ¦ +------ FDD unit selected status (0=A, 1=B, 2=...)
+ ¦ ¦ ¦ ¦ ¦ +------- FDD side head select status (0=head 0, 1=head 1)
+ ¦ ¦ ¦ ¦ +-------- FDD two sided status signal
+ ¦ ¦ ¦ +--------- FDD track zero status signal
+ ¦ ¦ +---------- FDD ready status signal
+ ¦ +----------- FDD write protect status signal
+ +------------ FDD fault status signal
+</PRE>
+
+</BLOCKQUOTE>
+
+</BODY>
+</HTML>

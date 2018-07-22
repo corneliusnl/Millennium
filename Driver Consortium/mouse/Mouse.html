@@ -1,0 +1,49 @@
+<HTML>
+<TITLE>Mouse</TITLE>
+<BODY BGCOLOR=#FFFFFF>
+
+<H1>Mouse</H1>
+<BLOCKQUOTE>
+
+The mouse interface is quite simple, with the mouse
+periodically checking its position and button status and
+sending a packet to the serial port.  Each byte received
+is stored in the serial port receive buffer.  Having
+placed the byte in the buffer, the serial port controller
+issues an interrupt - IRQ4 for COM1.  If that interrupt
+is not masked eithor in the serial port or in the
+interrupt controller, it arrives at the processor and the
+INT 0Ch (for COM1) occurs.
+
+<H2>Two Button Mice</H2>
+For 2 buttom mice this packet consists of three bytes.
+
+<H3>Byte 1</H3>
+<PRE>
+¦7¦6¦5¦4¦3¦2¦1¦0¦
+ ¦ ¦ ¦ ¦ ¦ ¦ ¦ +---- Bit 6 of x coordinate
+ ¦ ¦ ¦ ¦ ¦ ¦ +----- Bit 7 of x coordinate
+ ¦ ¦ ¦ ¦ ¦ +------ Bit 6 of y coordinate
+ ¦ ¦ ¦ ¦ +------- Bit 7 of y coordinate
+ ¦ ¦ ¦ +-------- Right button (If 1 ? down : up)
+ ¦ ¦ +--------- Left button (If 1 ? down : up)
+ ¦ +---------- Always 1
+ +-----------
+</PRE>
+
+<H3>Byte 2</H3>
+<PRE>
+Bit 0-5	0-5 bits of X coordinate
+Bit 6	Always 0
+</PRE>
+
+<H3>Byte 3</H3>
+<PRE>
+Bit 0-5	0-5 bits of Y coordinate
+Bit 6	Always 0
+</PRE>
+
+</BLOCKQUOTE>
+
+</BODY>
+</HTML>

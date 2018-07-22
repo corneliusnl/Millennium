@@ -1,0 +1,54 @@
+<HTML>
+<TITLE>MPU-401</TITLE>
+<BODY BGCOLOR="#FFFFFFF">
+
+<H1>MPU-401</H1>
+<BLOCKQUOTE>
+
+<H2>Registers</H2>
+
+<H3>03x00h (R/W) Data Port</H3>
+<PRE>
+<B>DESCRIPTION</B>
+ Port for MPU-401 data transfer.
+
+<B>PROCEDURE (R)</B>
+ a) Loop until bit 6 = 0 of MPU-401 Status Port (03x01h read)
+ b) Input byte from MPU-401 Data Register port (03x00h read/write)
+
+<B>PROCEDURE (W)</B>
+ a) Loop until bit 7 = 0 of MPU-401 Status Port (03x01h read)
+ b) Output byte to MPU-401 Data Register port (03x00h read/write)
+</PRE>
+
+<H3>03x01h (R) Status Port</H3>
+<PRE>
+<B>DESCRIPTION</B>
+ Indicates whether or not MPU-401 has data pending or is awaiting data.
+
+<B>STATUS BYTE</B>
+¦7¦6¦5¦4¦3¦2¦1¦0¦
+ ¦ ¦ ¦ ¦ ¦ ¦ ¦ +----
+ ¦ ¦ ¦ ¦ ¦ ¦ +-----
+ ¦ ¦ ¦ ¦ ¦ +------
+ ¦ ¦ ¦ ¦ +-------
+ ¦ ¦ ¦ +--------
+ ¦ ¦ +---------
+ ¦ +---------- Data read register (0=ready)
+ +----------- Data set ready (0=ready)
+</PRE>
+
+<H3>03x01h (W) Command Port</H3>
+<PRE>
+<B>DESCRIPTION</B>
+ Output port for MPU-401 command sequences.
+
+<B>PROCEDURE</B>
+ a) Loop until bit 7 = 0 of MPU-401 Status Port (03x01h read)
+ b) Output byte to MPU-401 Command Port (03x01h write)
+</PRE>
+
+</BLOCKQUOTE>
+
+</BODY>
+</HTML>

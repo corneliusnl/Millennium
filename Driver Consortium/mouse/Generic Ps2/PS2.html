@@ -1,0 +1,100 @@
+<HTML>
+<TITLE>PS/2 Mouse</TITLE>
+<BODY BGCOLOR="#FFFFFF">
+
+<H1>PS/2 Mouse</H1>
+<BLOCKQUOTE>
+
+<H2>About</H2>
+The PS/2 mouse uses, as does the PS/2 keyboard, port 60h and 64h. The mouse passes
+the controller data in form of an 8-byte mouse packet.
+
+<H2>Packet Compositon</H2>
+<H3>Byte 1</H3>
+<PRE>
+¦7¦6¦5¦4¦3¦2¦1¦0¦
+ ¦ ¦ ¦ ¦ ¦ ¦ ¦ +---- Left button pressed (1=true)
+ ¦ ¦ ¦ ¦ ¦ ¦ +----- Right button pressed (1=true)
+ ¦ ¦ ¦ ¦ ¦ +------ Reserved
+ ¦ ¦ ¦ ¦ +------- Reserved
+ ¦ ¦ ¦ +-------- X data negative
+ ¦ ¦ +--------- Y data negative
+ ¦ +---------- X data overflow
+ +----------- Y data overflow
+</PRE>
+
+<H3>Byte 2</H3>
+<PRE>
+¦7¦6¦5¦4¦3¦2¦1¦0¦ Reserved
+</PRE>
+
+<H3>Byte 3</H3>
+<PRE>
+¦7¦6¦5¦4¦3¦2¦1¦0¦ X-Data: Motion since last packet
+</PRE>
+
+<H3>Byte 4</H3>
+<PRE>
+¦7¦6¦5¦4¦3¦2¦1¦0¦ Reserved
+</PRE>
+
+<H3>Byte 5</H3>
+<PRE>
+¦7¦6¦5¦4¦3¦2¦1¦0¦ Y-Data: Motion since last packet
+</PRE>
+
+<H3>Byte 6</H3>
+<PRE>
+¦7¦6¦5¦4¦3¦2¦1¦0¦ Reserved
+</PRE>
+
+<H3>Byte 7</H3>
+<PRE>
+¦7¦6¦5¦4¦3¦2¦1¦0¦ Z-Data
+</PRE>
+
+<H3>Byte 8</H3>
+<PRE>
+¦7¦6¦5¦4¦3¦2¦1¦0¦ Reserved
+</PRE>
+
+<H2>Registers</H2>
+<H3>60h</H3>
+<PRE>
+<B>index E6h    sets x-y scaling factor to 1:1</B>
+<B>index E7h    sets x-y scaling to 2:1 </B>
+<B>index E8h    sets mouse resolution to the following data byte:</B>
+                00h=1 count/mm, 01h=2 c/mm, 02h=4 c/mm, 03h=8 c/mm
+<B>index E9h    sends a 3 byte status:</B>  
+                <B>byte 1</B>
+                bit 7   reserved
+                    6   mode (0=stream, 1=remote)
+                    5   enable mouse (0=disabled, 1=enabled)
+                    4   scaling (see command E8h)
+                    3   reserved
+                    2   left button pressed
+                    1   reserved
+                    0   right button pressed
+		<B>byte 2</B>
+		bit 0-7 resolution
+                <B>byte 3</B>
+                bit 0-7 sample rate
+<B>index EAh    sets stream mode
+<B>index EBh    transfers a data packet from moude controller
+<B>index ECh    resets mouse from wrap mode to normal mode
+<B>index EEh    sets mouse to wrap mode
+<B>index F0h    sets remote mode
+<B>index F2h    supplies an identify code (00=mouse)
+<B>index F3h    sets sample rate, availible choices are...
+                10d,20d,28d,60d,80d,100d,200d  (more???)
+<B>index F4h    enable data transfer in stream mode
+<B>index F5h    disable data transfer in stream mode
+<B>index F6h    init mouse with 100 samples/s, scaling 1:1
+<B>index FEh    resends the last data packet 
+<B>index FFh    executes an internal mouse test
+</PRE>
+
+</BLOCKQUOTE>
+
+</BODY>
+</HTML>

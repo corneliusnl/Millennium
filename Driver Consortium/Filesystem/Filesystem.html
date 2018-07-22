@@ -1,0 +1,97 @@
+<HTML>
+<TITLE>Filesystem</TITLE>
+<BODY BGCOLOR="#FFFFFF">
+
+<H1>Filesystem</H1>
+<BLOCKQUOTE>
+
+<H2>About</H2>
+The filesystem is, as the name suggests, a system for
+the storage and retrievel of files on disk.  The filesystem
+stores information on the files and directories onto a disk
+which can be read from the operating system and translated
+into a form more readily viewed by the user.
+<P>
+There are, however, many different filesystems (algorithms for storing
+information on disk).  Each operating system typical has its own
+filesystem (Linux has ext2, and Microsoft Windows has vfat).
+Millennium, however, does not have it's own proprietary
+filesystem but can use any filesystem desired through the
+use of <B>Millennium's Filesystem Abstraction Layer (MFSAL)</B> this
+layer provides a generic interface for which the kernel can interface
+with a filesystem -- thereby creating filesystem independance.
+
+<PRE>
++---------------------+
+|     Application     |
++---------------------+
+           |
+           \/
++---------------------+
+| Kernel              |
+|        +------------+
+|        | MFSAL      |
++--------+------------+
+               |
+               \/
++---------------------+
+| VFAT module         |
++---------------------+
+          |
+          \/
++---------------------+
+| VFAT filesystem     |
++---------------------+
+</PRE>
+
+<H2>Algorithms</H2>
+
+<H3>Contiguous Allocation</H3>
+This is the simpliest allocation algorithm in which each file
+is a contiguous block of data on disk.  Thus on a disk with 1K
+blocks, a 50K file would be allocated 50 consecutive blocks.
+The maintainence of files is simplified as all that is required
+is the location of the beginning block and the number of blocks,
+which can then be read in one read operation.
+<P>
+The disadvantages of this system, however, are fragmentation and
+the need for the file's final size to be known before being written.
+
+<H3>Linked List Allocation</H3>
+Using this algorithm each block of data has a header which points
+to the next block of the file.  Using this method all blocks can
+be used, however, randomly accessing blocks of data is
+painfully slow.  In addition, while not fatal, because of the header
+the data is no longer a power of two -- which is inefficient as
+many programs access data as powers of two.
+
+<H3>Linked List Allocation Using and Index</H3>
+Both disadvantages of the <I>linked list allocation</I> algorithm
+can be eliminated by taking the header of each block and placing
+it in a table or index in memory.  Usign this method, therefore,
+allow for the complete block to be used and random access can be
+speed up by using the table in memory.
+<P>
+The primary disadvantage of this method is that the table
+must reside in memory and with a large a large disk this
+table with consume a large amount of memory.  The MS-DOS
+filesystem which uses this method avoids using large tables
+by using large blocks.
+
+<H3>I-Nodes</H3>
+Yet another algorithm for keeping track of blocks is to associate
+each file with a table called an i-node (index-node), which lists
+the attributes and disk addresses of the file's blocks.
+
+<H2>Interface</H2>
+
+
+</BLOCKQUOTE>
+
+<B>References:</B>
+<UL>
+<LI>Operating Systems: Design and Implementation, Prentice Hall</LI>
+</UL>
+
+</BODY>
+</HTML>

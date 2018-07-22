@@ -1,0 +1,32 @@
+(Sept 3rd, 1998)
+I'm writing untested code with no idea as to whether or not it will work
+at the end of the day.  I find myself questioning whether or not I should
+further procede with such an ambitious project that I fear will again go
+unnoticed by my judges despite the amount of effort that I have put into
+such a large project.  I question my sanity for pursing this project, and
+it seems that the major force acting upon me is my delusions of grandure...
+but still the fear that all my work will go unnoticed slows down my progress
+by causing me to doubt and question everything.
+
+(September 15th, 1998)
+School has started, which is great because I find I do a lot more with
+less time when school starts.  I have been aimless over the past few weeks
+and unsure of what I should devote my efforts towards... I don't want to
+work upon another project that, despite exhibiting advanced programming,
+having no real applicable innovation that wouldn't require a major amount
+of development, not only on my part, but on societies.  I have decided that
+making my own operating system should not be the goal now, but to implement
+my innovative operating system ideas into the Linux project, under my own
+distribution.  As it would be foolish of me to think that I could make an
+entire operating system along with my innovations into a working project 
+in time for the science fair, and I have to realize that the innovation
+is the key.  With school having started, the gears are turning, and I've
+had some good ideas develop over the past few days that I feel should be
+developed as I feel they are the future of computers.  What I have to do
+now is watch a lot of Star Trek, do some reasearch into the human brain
+(in search for the perfect human computer interface), get some books
+on Linux programming, find what tools are available to me, and try
+and predict the future of computing by looking to the essentially
+characters of man/woman. 
+ 
+
